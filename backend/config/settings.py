@@ -75,7 +75,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'sms_automation_db',
+        'NAME': 'sms_automation',
         'USER': 'root',
         'PASSWORD': 'sivanesh',
         'HOST': 'localhost',
