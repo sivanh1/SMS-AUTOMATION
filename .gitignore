@@ -1,0 +1,50 @@
+# =========================
+# Python / Django
+# =========================
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+db.sqlite3
+
+# Environment variables
+.env
+
+# Django static/media cache
+staticfiles/
+media/
+
+# =========================
+# Node.js / React Native / Expo
+# =========================
+node_modules/
+.expo/
+.expo-shared/
+
+# npm logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# VS Code
+# =========================
+.vscode/
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Build folders
+# =========================
+dist/
+build/
+
+# =========================
+# Misc
+# =========================
+*.log
