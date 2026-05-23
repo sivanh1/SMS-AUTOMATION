@@ -2,7 +2,10 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Customer
 from services.google_sheets_service import get_sheet_data
+from django.db.models import Q
 
+from .serializer import CustomerSerializer
+from services.template_engine import generate_sms_preview
 
 @api_view(['POST'])
 def sync_customers(request):
@@ -41,3 +44,94 @@ def sync_customers(request):
         return Response({
             "error": str(error)
         }, status=500)
+    
+
+@api_view(['GET'])
+def search_customers(request):
+
+    search = request.GET.get('search')
+
+    customers = Customer.objects.filter(
+
+        Q(cust_name__icontains=search) |
+        Q(p_id__icontains=search)
+
+    )
+
+    serializer = CustomerSerializer(customers, many=True)
+
+    return Response(serializer.data)
+
+@api_view(['POST'])
+def get_customer(request):
+    customer_id = request.data.get("p_id")
+
+    if customer_id is None:
+        return Response(
+            {
+                "error": "Please provide p_id"
+            },
+            status=400
+        )
+
+    try:
+        customer = Customer.objects.get(
+            p_id=customer_id
+        )
+
+        customer_data = CustomerSerializer(customer)
+
+        return Response(customer_data.data)
+
+    except Customer.DoesNotExist:
+        return Response(
+            {
+                "error": "Customer not found"
+            },
+            status=404
+        )
+    
+@api_view(['POST'])
+def preview_sms(request):
+    customer_id = request.data.get("p_id")
+    template = request.data.get("template")
+
+    if not customer_id or not template:
+        return Response(
+            {
+                "error": "p_id and template are required"
+            },
+            status=400
+        )
+
+    try:
+        customer = Customer.objects.get(
+            p_id=customer_id
+        )
+
+        customer_data = {
+            "cust_name": customer.cust_name,
+            "amount": customer.amount,
+            "due_date": customer.due_date,
+            "mobile_number": customer.mobile_number,
+            "p_id": customer.p_id,
+        }
+
+        preview_message = generate_sms_preview(
+            template,
+            customer_data
+        )
+
+        return Response(
+            {
+                "preview": preview_message
+            }
+        )
+
+    except Customer.DoesNotExist:
+        return Response(
+            {
+                "error": "Customer not found"
+            },
+            status=404
+        )
