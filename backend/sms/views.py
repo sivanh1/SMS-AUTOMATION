@@ -1,9 +1,14 @@
 from datetime import datetime
 
-from rest_framework.decorators import api_view
-from rest_framework.decorators import permission_classes
+from rest_framework.decorators import (
+    api_view,
+    permission_classes,
+)
 
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (
+    IsAuthenticated,
+    AllowAny,
+)
 
 from rest_framework.response import Response
 
@@ -14,9 +19,10 @@ from .models import SMSLog
 from .serializers import SMSLogSerializer
 
 
-@api_view(['POST'])
+# SEND SMS
 
-@permission_classes([IsAuthenticated])
+@api_view(['POST'])
+@permission_classes([AllowAny])
 
 def send_sms(request):
 
@@ -28,7 +34,8 @@ def send_sms(request):
 
         return Response({
 
-            "error": "p_id and message are required"
+            "error":
+            "p_id and message are required"
 
         }, status=400)
 
@@ -42,7 +49,9 @@ def send_sms(request):
 
             customer=customer,
 
-            sent_by=request.user,
+            sent_by=request.user
+            if request.user.is_authenticated
+            else None,
 
             message=message,
 
@@ -70,16 +79,19 @@ def send_sms(request):
 
         return Response({
 
-            "message": "SMS logged successfully",
+            "message":
+            "SMS logged successfully",
 
-            "status": sms_log.status
+            "status":
+            sms_log.status
         })
 
     except Customer.DoesNotExist:
 
         return Response({
 
-            "error": "Customer not found"
+            "error":
+            "Customer not found"
 
         }, status=404)
 
@@ -87,13 +99,16 @@ def send_sms(request):
 
         return Response({
 
-            "error": str(error)
+            "error":
+            str(error)
 
         }, status=500)
-    
-@api_view(['GET'])
 
-@permission_classes([IsAuthenticated])
+
+# SMS LOGS
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
 
 def sms_logs(request):
 

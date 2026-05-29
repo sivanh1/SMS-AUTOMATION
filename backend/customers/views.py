@@ -7,6 +7,24 @@ from django.db.models import Q
 from .serializer import CustomerSerializer
 from services.template_engine import generate_sms_preview
 
+
+#GET CUSTOMERS
+@api_view(['GET'])
+def list_customers(request):
+
+    customers = Customer.objects.all().order_by(
+        'id'
+    )
+
+    serializer = CustomerSerializer(
+        customers,
+        many=True
+    )
+
+    return Response(serializer.data)
+
+
+#SYNC CUSTOMERS
 @api_view(['POST'])
 def sync_customers(request):
     sheet_id = request.data.get("sheet_id")
@@ -46,6 +64,7 @@ def sync_customers(request):
         }, status=500)
     
 
+#SEARCH CUSTOMERS
 @api_view(['GET'])
 def search_customers(request):
 
@@ -62,6 +81,8 @@ def search_customers(request):
 
     return Response(serializer.data)
 
+
+#GET CUSTOMER BY P_ID
 @api_view(['POST'])
 def get_customer(request):
     customer_id = request.data.get("p_id")
@@ -91,6 +112,7 @@ def get_customer(request):
             status=404
         )
     
+#PREVIEW SMS
 @api_view(['POST'])
 def preview_sms(request):
     customer_id = request.data.get("p_id")

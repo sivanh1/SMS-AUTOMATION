@@ -135,8 +135,25 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # CORS CONFIGURATION
+# CORS CONFIGURATION
+
 CORS_ALLOW_ALL_ORIGINS = True
 
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = [
+    "*",
+]
+
+CORS_ALLOW_METHODS = [
+    "*",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+
+    "https://*.ngrok-free.dev",
+
+]
 
 # DJANGO REST FRAMEWORK CONFIGURATION
 # REST_FRAMEWORK = {}
@@ -152,4 +169,23 @@ REST_FRAMEWORK = {
 
         'rest_framework.permissions.IsAuthenticated',
     ]
+}
+from datetime import timedelta
+
+
+SIMPLE_JWT = {
+
+    'ACCESS_TOKEN_LIFETIME': timedelta(
+        days=1
+    ),
+
+    'REFRESH_TOKEN_LIFETIME': timedelta(
+        days=30
+    ),
+
+    'ROTATE_REFRESH_TOKENS': False,
+
+    'BLACKLIST_AFTER_ROTATION': False,
+
+    'UPDATE_LAST_LOGIN': True,
 }
