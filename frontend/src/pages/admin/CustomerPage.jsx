@@ -124,12 +124,7 @@ export default function CustomersPage() {
     }
   };
 
-  // LOAD CUSTOMERS ON PAGE LOAD
-  useEffect(() => {
 
-    fetchCustomers();
-
-  }, []);
 
   // PAGINATION LOGIC
   const lastIndex =
