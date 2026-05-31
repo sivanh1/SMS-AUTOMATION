@@ -14,7 +14,6 @@ api.interceptors.request.use(
       "access_token"
     );
 
-    console.log("TOKEN:", token);
 
     if (
       token &&

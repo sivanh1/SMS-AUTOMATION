@@ -1,18 +1,26 @@
+
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 
 export default function CustomersPage() {
+
+  // STATES
   const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [sheetId, setSheetId] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // PAGINATION
   const [currentPage, setCurrentPage] = useState(1);
 
   const customersPerPage = 5;
 
+  // FETCH ALL CUSTOMERS
   const fetchCustomers = async () => {
+
     try {
+
       setLoading(true);
 
       const response = await api.get(
@@ -23,7 +31,7 @@ export default function CustomersPage() {
 
     } catch (error) {
 
-      toast.error("Failed to fetch customers");
+      toast.error("Failed to load customers");
 
     } finally {
 
@@ -32,13 +40,17 @@ export default function CustomersPage() {
     }
   };
 
-  const handleSearch = async () => {
-    if (search.trim() === "") {
+  // SEARCH CUSTOMERS
+  const searchCustomers = async () => {
+
+    // IF SEARCH EMPTY -> LOAD ALL
+    if (search === "") {
       fetchCustomers();
       return;
     }
 
     try {
+
       setLoading(true);
 
       const response = await api.get(
@@ -46,6 +58,8 @@ export default function CustomersPage() {
       );
 
       setCustomers(response.data);
+
+      setCurrentPage(1);
 
     } catch (error) {
 
@@ -58,29 +72,42 @@ export default function CustomersPage() {
     }
   };
 
-  const handleSync = async () => {
-    if (!sheetId) {
-      toast.error("Please enter Sheet ID");
+  // SYNC CUSTOMERS
+  const syncCustomers = async () => {
+
+    if (sheetId === "") {
+      toast.error("Enter Sheet ID");
       return;
     }
 
     try {
+
       setLoading(true);
 
       const response = await api.post(
         "/customers/sync/",
-        { sheet_id: sheetId }
+        {
+          sheet_id: sheetId
+        }
       );
 
       toast.success(response.data.message);
 
-      fetchCustomers();
+      // REFRESH TABLE
+      await fetchCustomers();
 
+      // CLEAR INPUT
       setSheetId("");
+
+      // RESET PAGE
+      setCurrentPage(1);
 
     } catch (error) {
 
-      toast.error("Customer sync failed");
+      toast.error(
+        error.response?.data?.error ||
+        "Sync failed"
+      );
 
     } finally {
 
@@ -89,41 +116,44 @@ export default function CustomersPage() {
     }
   };
 
+  // ENTER KEY SEARCH
   const handleKeyDown = (e) => {
+
     if (e.key === "Enter") {
-      handleSearch();
+      searchCustomers();
     }
   };
 
-  const indexOfLastCustomer =
-    currentPage * customersPerPage;
-
-  const indexOfFirstCustomer =
-    indexOfLastCustomer - customersPerPage;
-
-  const currentCustomers =
-    customers.slice(
-      indexOfFirstCustomer,
-      indexOfLastCustomer
-    );
-
-  const totalPages = Math.ceil(
-    customers.length / customersPerPage
-  );
-
+  // LOAD CUSTOMERS ON PAGE LOAD
   useEffect(() => {
+
     fetchCustomers();
+
   }, []);
 
+  // PAGINATION LOGIC
+  const lastIndex =
+    currentPage * customersPerPage;
+
+  const firstIndex =
+    lastIndex - customersPerPage;
+
+  const currentCustomers =
+    customers.slice(firstIndex, lastIndex);
+
+  const totalPages =
+    Math.ceil(customers.length / customersPerPage);
+
   return (
+
     <div className="p-6 bg-white min-h-screen">
 
-      <h1 className="text-2xl font-semibold mb-6">
+      <h1 className="text-2xl font-bold mb-5">
         Customers
       </h1>
 
-      {/* Search */}
-      <div className="mb-4 flex gap-3">
+      {/* SEARCH */}
+      <div className="flex gap-3 mb-4">
 
         <input
           type="text"
@@ -133,67 +163,69 @@ export default function CustomersPage() {
             setSearch(e.target.value)
           }
           onKeyDown={handleKeyDown}
-          className="border border-gray-300 px-3 py-2 rounded w-full text-sm"
+          className="border px-3 py-2 rounded w-full"
         />
 
         <button
-          onClick={handleSearch}
-          className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
+          onClick={searchCustomers}
+          className="bg-blue-600 text-white px-4 rounded"
         >
           Search
         </button>
 
       </div>
 
-      {/* Sync */}
-      <div className="mb-6 flex gap-3">
+      {/* SYNC */}
+      <div className="flex gap-3 mb-5">
 
         <input
           type="text"
-          placeholder="Enter Sheet ID"
+          placeholder="Enter Google Sheet ID"
           value={sheetId}
           onChange={(e) =>
             setSheetId(e.target.value)
           }
-          className="border border-gray-300 px-3 py-2 rounded w-full text-sm"
+          className="border px-3 py-2 rounded w-full"
         />
 
         <button
-          onClick={handleSync}
-          className="bg-black text-white px-4 py-2 rounded text-sm"
+          onClick={syncCustomers}
+          className="bg-black text-white px-4 rounded"
         >
           Sync
         </button>
 
       </div>
 
-      {/* Table */}
-      <div className="border border-gray-200 rounded overflow-hidden">
+      {/* TABLE */}
+      <div className="border rounded overflow-hidden">
 
-        <table className="w-full text-sm">
+        <table className="w-full">
 
           <thead className="bg-gray-100">
 
             <tr>
-              <th className="text-left px-4 py-3">
+
+              <th className="text-left p-3">
                 P_ID
               </th>
 
-              <th className="text-left px-4 py-3">
-                Customer Name
+              <th className="text-left p-3">
+                Name
               </th>
 
-              <th className="text-left px-4 py-3">
-                Mobile Number
+              <th className="text-left p-3">
+                Mobile
               </th>
 
-              <th className="text-left px-4 py-3">
+              <th className="text-left p-3">
                 Amount
               </th>
 
-              <th className="text-left px-4 py-3">
+              <th className="text-left p-3">
                 Due Date
               </th>
+
             </tr>
 
           </thead>
@@ -203,52 +235,60 @@ export default function CustomersPage() {
             {loading ? (
 
               <tr>
+
                 <td
                   colSpan="5"
-                  className="text-center py-6"
+                  className="text-center p-5"
                 >
                   Loading...
                 </td>
+
               </tr>
 
-            ) : customers.length === 0 ? (
+            ) : currentCustomers.length === 0 ? (
 
               <tr>
+
                 <td
                   colSpan="5"
-                  className="text-center py-6"
+                  className="text-center p-5"
                 >
                   No customers found
                 </td>
+
               </tr>
 
             ) : (
 
               currentCustomers.map((customer) => (
+
                 <tr
                   key={customer.p_id}
                   className="border-t"
                 >
-                  <td className="px-4 py-3">
+
+                  <td className="p-3">
                     {customer.p_id}
                   </td>
 
-                  <td className="px-4 py-3">
+                  <td className="p-3">
                     {customer.cust_name}
                   </td>
 
-                  <td className="px-4 py-3">
+                  <td className="p-3">
                     {customer.mobile_number}
                   </td>
 
-                  <td className="px-4 py-3">
+                  <td className="p-3">
                     {customer.amount}
                   </td>
 
-                  <td className="px-4 py-3">
+                  <td className="p-3">
                     {customer.due_date}
                   </td>
+
                 </tr>
+
               ))
 
             )}
@@ -259,29 +299,32 @@ export default function CustomersPage() {
 
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-end items-center gap-3 mt-4">
+      {/* PAGINATION */}
+      <div className="flex justify-end gap-3 mt-5">
 
         <button
-          disabled={currentPage === 1}
           onClick={() =>
             setCurrentPage(currentPage - 1)
           }
-          className="border px-3 py-1 rounded disabled:opacity-50"
+          disabled={currentPage === 1}
+          className="border px-3 py-1 rounded"
         >
           Prev
         </button>
 
-        <span className="text-sm">
-          {currentPage} / {totalPages}
+        <span>
+          {currentPage} / {totalPages || 1}
         </span>
 
         <button
-          disabled={currentPage === totalPages}
           onClick={() =>
             setCurrentPage(currentPage + 1)
           }
-          className="border px-3 py-1 rounded disabled:opacity-50"
+          disabled={
+            currentPage === totalPages ||
+            totalPages === 0
+          }
+          className="border px-3 py-1 rounded"
         >
           Next
         </button>
