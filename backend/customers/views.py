@@ -27,43 +27,64 @@ def list_customers(request):
 #SYNC CUSTOMERS
 @api_view(['POST'])
 def sync_customers(request):
+
     sheet_id = request.data.get("sheet_id")
 
     if not sheet_id:
+
         return Response({
             "error": "Sheet ID is required"
         }, status=400)
 
     try:
+
+        # CLEAR OLD CUSTOMERS
+        Customer.objects.all().delete()
+
         records = get_sheet_data(sheet_id)
 
         synced_count = 0
 
         for row in records:
-            Customer.objects.update_or_create(
+
+            if not row.get("p_id"):
+                continue
+
+            Customer.objects.create(
+
                 p_id=row.get("p_id"),
-                defaults={
-                    "cust_name": row.get("cust_name"),
-                    "mobile_number": row.get("mobile_number"),
-                    "amount": row.get("amount"),
-                    "due_date": row.get("due_date"),
-                    "sheet_id": sheet_id
-                }
+
+                cust_name=row.get("cust_name"),
+
+                mobile_number=row.get("mobile_number"),
+
+                amount=row.get("amount") or 0,
+
+                due_date=row.get("due_date") or None,
+
+                sheet_id=sheet_id
             )
 
             synced_count += 1
 
         return Response({
-            "message": "Customers synchronized successfully",
-            "total_synced": synced_count
+
+            "message":
+            "Customers synchronized successfully",
+
+            "total_synced":
+            synced_count
+
         })
 
     except Exception as error:
-        return Response({
-            "error": str(error)
-        }, status=500)
-    
 
+        return Response({
+
+            "error":
+            str(error)
+
+        }, status=500)
 #SEARCH CUSTOMERS
 @api_view(['GET'])
 def search_customers(request):

@@ -17,6 +17,10 @@ A web app that fetches customer data from Google Sheets and sends personalised S
 | Admin    | Dashboard, Customers, Templates, Logs, User Management |
 | Operator | SMS Sender, Customers                                  |
 
+## Tables and API endpoints
+
+![Table Structure](./assets/DB.png)
+
 ## Tech Stack
 
 * **Frontend** — React.js
