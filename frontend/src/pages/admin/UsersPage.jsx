@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 
-import toast from "react-hot-toast";
-
 import api from "../../services/api";
 
 export default function UsersPage() {
 
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] =
+    useState([]);
 
   const [loading, setLoading] =
     useState(true);
@@ -20,7 +19,24 @@ export default function UsersPage() {
   const [role, setRole] =
     useState("operator");
 
+  const [successMessage, setSuccessMessage] =
+    useState("");
+
+  const [errorMessage, setErrorMessage] =
+    useState("");
+
+  const [usernameError, setUsernameError] =
+    useState("");
+
+  const [passwordError, setPasswordError] =
+    useState("");
+
+
+
+  // FETCH USERS
   const fetchUsers = async () => {
+
+    setErrorMessage("");
 
     try {
 
@@ -31,23 +47,58 @@ export default function UsersPage() {
 
     } catch (error) {
 
-      toast.error("Failed");
+      console.log(
+        "Fetch Users Error:",
+        error.response?.data
+      );
+
+      setErrorMessage(
+
+        error.response?.data?.error ||
+
+        error.response?.data?.detail ||
+
+        "Failed to fetch users"
+      );
 
     } finally {
 
       setLoading(false);
-
     }
   };
 
+
+
+  // CREATE USER
   const handleCreateUser = async () => {
 
-    if (!username || !password) {
+    setErrorMessage("");
 
-      toast.error("Enter all fields");
+    setUsernameError("");
 
-      return;
+    setPasswordError("");
+
+    let hasError = false;
+
+    if (!username.trim()) {
+
+      setUsernameError(
+        "Username cannot be blank"
+      );
+
+      hasError = true;
     }
+
+    if (!password.trim()) {
+
+      setPasswordError(
+        "Password cannot be blank"
+      );
+
+      hasError = true;
+    }
+
+    if (hasError) return;
 
     try {
 
@@ -61,7 +112,7 @@ export default function UsersPage() {
           }
         );
 
-      toast.success(
+      setSuccessMessage(
         response.data.message
       );
 
@@ -73,15 +124,31 @@ export default function UsersPage() {
 
       fetchUsers();
 
+      setTimeout(() => {
+
+        setSuccessMessage("");
+
+      }, 3000);
+
     } catch (error) {
 
-      toast.error(
-        error.response?.data?.error ||
-        "Error"
+      console.log(
+        "Create User Error:",
+        error.response?.data
       );
 
+      setErrorMessage(
+
+        error.response?.data?.error ||
+
+        error.response?.data?.detail ||
+
+        "Failed to create user"
+      );
     }
   };
+
+
 
   useEffect(() => {
 
@@ -89,20 +156,22 @@ export default function UsersPage() {
 
   }, []);
 
+
+
   return (
 
     <div
       className="
-    min-h-screen
+        min-h-screen
 
-    bg-gray-50
-    dark:bg-[#0f0f0f]
+        bg-gray-50
+        dark:bg-[#0f0f0f]
 
-    p-6
+        p-6
 
-    transition-colors
-    duration-300
-  "
+        transition-colors
+        duration-300
+      "
     >
 
       {/* Header */}
@@ -110,161 +179,288 @@ export default function UsersPage() {
 
         <h1
           className="
-        text-3xl
-        font-semibold
+            text-3xl
+            font-semibold
 
-        text-gray-800
-        dark:text-[#e5e5e5]
-      "
+            text-gray-800
+            dark:text-[#e5e5e5]
+          "
         >
           Users
         </h1>
 
         <p
           className="
-        text-sm
-        mt-1
+            text-sm
+            mt-1
 
-        text-gray-500
-        dark:text-[#9ca3af]
-      "
+            text-gray-500
+            dark:text-[#9ca3af]
+          "
         >
           Manage system users and roles
         </p>
 
       </div>
 
+
+
+      {/* Success Message */}
+      {successMessage && (
+
+        <div
+          className="
+            mb-5
+            px-4 py-3
+
+            rounded-xl
+            text-sm
+
+            border
+            border-green-200
+            dark:border-green-900/30
+
+            bg-green-50
+            dark:bg-green-950/20
+
+            text-green-700
+            dark:text-green-400
+
+            transition-colors
+          "
+        >
+          {successMessage}
+        </div>
+      )}
+
+
+
+      {/* Error Message */}
+      {errorMessage && (
+
+        <div
+          className="
+            mb-5
+            px-4 py-3
+
+            rounded-xl
+            text-sm
+
+            border
+            border-red-200
+            dark:border-red-900/30
+
+            bg-red-50
+            dark:bg-red-950/20
+
+            text-red-700
+            dark:text-red-400
+
+            transition-colors
+          "
+        >
+          {errorMessage}
+        </div>
+      )}
+
+
+
       {/* Create User */}
       <div
         className="
-      bg-white
-      dark:bg-[#181818]
+          bg-white
+          dark:bg-[#181818]
 
-      border
-      border-gray-200
-      dark:border-[#2a2a2a]
+          border
+          border-gray-200
+          dark:border-[#2a2a2a]
 
-      rounded-xl
+          rounded-xl
 
-      p-5
-      mb-6
+          p-5
+          mb-6
 
-      transition-colors
-      duration-300
-    "
+          transition-colors
+          duration-300
+        "
       >
 
         <h2
           className="
-        text-lg
-        font-medium
-        mb-4
+            text-lg
+            font-medium
+            mb-4
 
-        text-gray-800
-        dark:text-[#e5e5e5]
-      "
+            text-gray-800
+            dark:text-[#e5e5e5]
+          "
         >
           Create User
         </h2>
 
+
+
         <div className="flex flex-col md:flex-row gap-3">
 
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) =>
-              setUsername(e.target.value)
-            }
-            className="
-          flex-1
+          {/* Username */}
+          <div className="flex-1">
 
-          px-4 py-2
+            <input
+              type="text"
 
-          rounded-lg
-          outline-none
+              placeholder="Username"
 
-          border
-          border-gray-200
-          dark:border-[#2a2a2a]
+              value={username}
 
-          bg-white
-          dark:bg-[#151515]
+              onChange={(e) =>
+                setUsername(
+                  e.target.value
+                )
+              }
 
-          text-gray-800
-          dark:text-[#e5e5e5]
+              className="
+                w-full
 
-          placeholder:text-gray-400
-          dark:placeholder:text-[#6b7280]
+                px-4 py-2
 
-          focus:border-gray-400
-          dark:focus:border-[#3a3a3a]
+                rounded-lg
+                outline-none
 
-          transition-colors
-        "
-          />
+                border
+                border-gray-200
+                dark:border-[#2a2a2a]
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) =>
-              setPassword(e.target.value)
-            }
-            className="
-          flex-1
+                bg-white
+                dark:bg-[#151515]
 
-          px-4 py-2
+                text-gray-800
+                dark:text-[#e5e5e5]
 
-          rounded-lg
-          outline-none
+                placeholder:text-gray-400
+                dark:placeholder:text-[#6b7280]
 
-          border
-          border-gray-200
-          dark:border-[#2a2a2a]
+                focus:border-gray-400
+                dark:focus:border-[#3a3a3a]
 
-          bg-white
-          dark:bg-[#151515]
+                transition-colors
+              "
+            />
 
-          text-gray-800
-          dark:text-[#e5e5e5]
+            {usernameError && (
 
-          placeholder:text-gray-400
-          dark:placeholder:text-[#6b7280]
+              <p
+                className="
+                  mt-2
 
-          focus:border-gray-400
-          dark:focus:border-[#3a3a3a]
+                  text-sm
 
-          transition-colors
-        "
-          />
+                  text-red-500
+                  dark:text-red-400
+                "
+              >
+                {usernameError}
+              </p>
+            )}
 
+          </div>
+
+
+
+          {/* Password */}
+          <div className="flex-1">
+
+            <input
+              type="password"
+
+              placeholder="Password"
+
+              value={password}
+
+              onChange={(e) =>
+                setPassword(
+                  e.target.value
+                )
+              }
+
+              className="
+                w-full
+
+                px-4 py-2
+
+                rounded-lg
+                outline-none
+
+                border
+                border-gray-200
+                dark:border-[#2a2a2a]
+
+                bg-white
+                dark:bg-[#151515]
+
+                text-gray-800
+                dark:text-[#e5e5e5]
+
+                placeholder:text-gray-400
+                dark:placeholder:text-[#6b7280]
+
+                focus:border-gray-400
+                dark:focus:border-[#3a3a3a]
+
+                transition-colors
+              "
+            />
+
+            {passwordError && (
+
+              <p
+                className="
+                  mt-2
+
+                  text-sm
+
+                  text-red-500
+                  dark:text-red-400
+                "
+              >
+                {passwordError}
+              </p>
+            )}
+
+          </div>
+
+
+
+          {/* Role */}
           <select
             value={role}
+
             onChange={(e) =>
-              setRole(e.target.value)
+              setRole(
+                e.target.value
+              )
             }
+
             className="
-          px-4 py-2
+              px-4 py-2
 
-          rounded-lg
-          outline-none
+              rounded-lg
+              outline-none
 
-          border
-          border-gray-200
-          dark:border-[#2a2a2a]
+              border
+              border-gray-200
+              dark:border-[#2a2a2a]
 
-          bg-white
-          dark:bg-[#151515]
+              bg-white
+              dark:bg-[#151515]
 
-          text-gray-800
-          dark:text-[#e5e5e5]
+              text-gray-800
+              dark:text-[#e5e5e5]
 
-          focus:border-gray-400
-          dark:focus:border-[#3a3a3a]
+              focus:border-gray-400
+              dark:focus:border-[#3a3a3a]
 
-          transition-colors
-        "
+              transition-colors
+            "
           >
 
             <option value="operator">
@@ -277,24 +473,28 @@ export default function UsersPage() {
 
           </select>
 
+
+
+          {/* Create Button */}
           <button
             onClick={handleCreateUser}
+
             className="
-          px-5 py-2
+              px-5 py-2
 
-          rounded-lg
+              rounded-lg
 
-          bg-gray-900
-          dark:bg-[#222222]
+              bg-gray-900
+              dark:bg-[#222222]
 
-          text-white
-          dark:text-[#e5e5e5]
+              text-white
+              dark:text-[#e5e5e5]
 
-          hover:bg-black
-          dark:hover:bg-[#2a2a2a]
+              hover:bg-black
+              dark:hover:bg-[#2a2a2a]
 
-          transition-colors
-        "
+              transition-colors
+            "
           >
             Create
           </button>
@@ -303,22 +503,24 @@ export default function UsersPage() {
 
       </div>
 
+
+
       {/* Users Table */}
       <div
         className="
-      bg-white
-      dark:bg-[#181818]
+          bg-white
+          dark:bg-[#181818]
 
-      border
-      border-gray-200
-      dark:border-[#2a2a2a]
+          border
+          border-gray-200
+          dark:border-[#2a2a2a]
 
-      rounded-xl
-      overflow-hidden
+          rounded-xl
+          overflow-hidden
 
-      transition-colors
-      duration-300
-    "
+          transition-colors
+          duration-300
+        "
       >
 
         <div className="overflow-x-auto">
@@ -327,22 +529,22 @@ export default function UsersPage() {
 
             <thead
               className="
-            bg-gray-50
-            dark:bg-[#151515]
+                bg-gray-50
+                dark:bg-[#151515]
 
-            border-b
-            border-gray-200
-            dark:border-[#2a2a2a]
-          "
+                border-b
+                border-gray-200
+                dark:border-[#2a2a2a]
+              "
             >
 
               <tr
                 className="
-              text-sm
+                  text-sm
 
-              text-gray-600
-              dark:text-[#9ca3af]
-            "
+                  text-gray-600
+                  dark:text-[#9ca3af]
+                "
               >
 
                 <th className="text-left px-6 py-4 font-medium">
@@ -365,6 +567,8 @@ export default function UsersPage() {
 
             </thead>
 
+
+
             <tbody>
 
               {loading ? (
@@ -373,13 +577,14 @@ export default function UsersPage() {
 
                   <td
                     colSpan="4"
-                    className="
-                  text-center
-                  py-10
 
-                  text-gray-400
-                  dark:text-[#9ca3af]
-                "
+                    className="
+                      text-center
+                      py-10
+
+                      text-gray-400
+                      dark:text-[#9ca3af]
+                    "
                   >
                     Loading users...
                   </td>
@@ -392,13 +597,14 @@ export default function UsersPage() {
 
                   <td
                     colSpan="4"
-                    className="
-                  text-center
-                  py-10
 
-                  text-gray-400
-                  dark:text-[#9ca3af]
-                "
+                    className="
+                      text-center
+                      py-10
+
+                      text-gray-400
+                      dark:text-[#9ca3af]
+                    "
                   >
                     No users found
                   </td>
@@ -411,52 +617,57 @@ export default function UsersPage() {
 
                   <tr
                     key={user.id}
+
                     className="
-                  border-b
-                  last:border-none
+                      border-b
+                      last:border-none
 
-                  border-gray-200
-                  dark:border-[#2a2a2a]
+                      border-gray-200
+                      dark:border-[#2a2a2a]
 
-                  hover:bg-gray-50
-                  dark:hover:bg-[#1c1c1c]
+                      hover:bg-gray-50
+                      dark:hover:bg-[#1c1c1c]
 
-                  transition-colors
-                "
+                      transition-colors
+                    "
                   >
 
                     <td
                       className="
-                    px-6 py-4
-                    font-medium
+                        px-6 py-4
+                        font-medium
 
-                    text-gray-800
-                    dark:text-[#e5e5e5]
-                  "
+                        text-gray-800
+                        dark:text-[#e5e5e5]
+                      "
                     >
                       {user.username}
                     </td>
 
+
+
                     <td
                       className="
-                    px-6 py-4
-                    text-sm
+                        px-6 py-4
+                        text-sm
 
-                    text-gray-600
-                    dark:text-[#9ca3af]
-                  "
+                        text-gray-600
+                        dark:text-[#9ca3af]
+                      "
                     >
                       {user.role}
                     </td>
 
+
+
                     <td
                       className="
-                    px-6 py-4
-                    text-sm
+                        px-6 py-4
+                        text-sm
 
-                    text-gray-600
-                    dark:text-[#9ca3af]
-                  "
+                        text-gray-600
+                        dark:text-[#9ca3af]
+                      "
                     >
 
                       {user.is_superuser
@@ -465,14 +676,16 @@ export default function UsersPage() {
 
                     </td>
 
+
+
                     <td
                       className="
-                    px-6 py-4
-                    text-sm
+                        px-6 py-4
+                        text-sm
 
-                    text-gray-600
-                    dark:text-[#9ca3af]
-                  "
+                        text-gray-600
+                        dark:text-[#9ca3af]
+                      "
                     >
 
                       {new Date(

@@ -406,7 +406,7 @@ export default function DashboardPage() {
               </th>
 
               <th className="text-left px-6 py-4 font-medium">
-                Status
+                Message
               </th>
 
               <th className="text-left px-6 py-4 font-medium">
@@ -518,7 +518,7 @@ export default function DashboardPage() {
                         dark:text-[#e5e5e5]
                       "
                     >
-                      {log.status}
+                      {log.message}
                     </span>
 
                   </td>

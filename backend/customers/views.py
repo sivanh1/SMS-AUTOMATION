@@ -25,6 +25,7 @@ def list_customers(request):
 
 
 #SYNC CUSTOMERS
+#SYNC CUSTOMERS
 @api_view(['POST'])
 def sync_customers(request):
 
@@ -79,12 +80,14 @@ def sync_customers(request):
 
     except Exception as error:
 
+        print("SYNC ERROR:", error)
+
         return Response({
 
-            "error":
-            str(error)
+            "error": "Check Sheet ID"
 
-        }, status=500)
+        }, status=404)
+    
 #SEARCH CUSTOMERS
 @api_view(['GET'])
 def search_customers(request):
@@ -94,7 +97,7 @@ def search_customers(request):
     customers = Customer.objects.filter(
 
         Q(cust_name__icontains=search) |
-        Q(p_id__icontains=search)
+        Q(p_id=search)
 
     )
 

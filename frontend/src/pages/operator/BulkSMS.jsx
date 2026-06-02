@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-import toast from "react-hot-toast";
-
 import api from "../../services/api";
 
 export default function BulkSMS() {
@@ -24,6 +22,12 @@ export default function BulkSMS() {
   const [successMessage, setSuccessMessage] =
     useState("");
 
+  const [errorMessage, setErrorMessage] =
+    useState("");
+
+  const [fieldError, setFieldError] =
+    useState("");
+
 
 
   const fetchTemplates = async () => {
@@ -37,7 +41,17 @@ export default function BulkSMS() {
 
     } catch (error) {
 
-      toast.error(
+      console.log(
+        "Template Error:",
+        error.response?.data
+      );
+
+      setErrorMessage(
+
+        error.response?.data?.error ||
+
+        error.response?.data?.detail ||
+
         "Failed to load templates"
       );
     }
@@ -47,10 +61,14 @@ export default function BulkSMS() {
 
   const previewBulkSMS = async () => {
 
+    setErrorMessage("");
+
+    setFieldError("");
+
     if (!selectedTemplate) {
 
-      toast.error(
-        "Select a template"
+      setFieldError(
+        "Please select a template"
       );
 
       return;
@@ -73,13 +91,29 @@ export default function BulkSMS() {
         response.data.customers
       );
 
-      toast.success(
-        "Bulk preview generated"
+      setSuccessMessage(
+        "Bulk preview generated successfully"
       );
+
+      setTimeout(() => {
+
+        setSuccessMessage("");
+
+      }, 3000);
 
     } catch (error) {
 
-      toast.error(
+      console.log(
+        "Bulk Preview Error:",
+        error.response?.data
+      );
+
+      setErrorMessage(
+
+        error.response?.data?.error ||
+
+        error.response?.data?.detail ||
+
         "Failed to generate preview"
       );
 
@@ -93,10 +127,12 @@ export default function BulkSMS() {
 
   const sendBulkSMS = async () => {
 
+    setErrorMessage("");
+
     if (bulkPreview.length === 0) {
 
-      toast.error(
-        "Generate preview first"
+      setErrorMessage(
+        "Generate preview before sending SMS"
       );
 
       return;
@@ -114,13 +150,9 @@ export default function BulkSMS() {
         }
       );
 
-      toast.success(
-        "Bulk SMS sent"
-      );
-
       setSuccessMessage(
 
-        `SMS sent to ${bulkPreview.length} customers`
+        `SMS sent successfully to ${bulkPreview.length} customers`
       );
 
       setBulkPreview([]);
@@ -135,7 +167,17 @@ export default function BulkSMS() {
 
     } catch (error) {
 
-      toast.error(
+      console.log(
+        "Bulk Send Error:",
+        error.response?.data
+      );
+
+      setErrorMessage(
+
+        error.response?.data?.error ||
+
+        error.response?.data?.detail ||
+
         "Failed to send SMS"
       );
 
@@ -232,6 +274,36 @@ export default function BulkSMS() {
 
 
 
+      {/* Error Message */}
+      {errorMessage && (
+
+        <div
+          className="
+            mb-5
+            px-4 py-3
+
+            rounded-xl
+            text-sm
+
+            border
+            border-red-200
+            dark:border-red-900/30
+
+            bg-red-50
+            dark:bg-red-950/20
+
+            text-red-700
+            dark:text-red-400
+
+            transition-colors
+          "
+        >
+          {errorMessage}
+        </div>
+      )}
+
+
+
       {/* Template Selection */}
       <div
         className="
@@ -317,6 +389,24 @@ export default function BulkSMS() {
           ))}
 
         </select>
+
+
+
+        {fieldError && (
+
+          <p
+            className="
+              mt-2
+
+              text-sm
+
+              text-red-500
+              dark:text-red-400
+            "
+          >
+            {fieldError}
+          </p>
+        )}
 
 
 
@@ -512,11 +602,7 @@ export default function BulkSMS() {
 
 
 
-                  <div
-                    className="
-                      text-right
-                    "
-                  >
+                  <div className="text-right">
 
                     <p
                       className="
@@ -538,7 +624,7 @@ export default function BulkSMS() {
                         dark:text-[#e5e5e5]
                       "
                     >
-                      ₹ {customer.amount}
+                      {customer.amount}
                     </p>
 
                   </div>

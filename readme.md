@@ -39,6 +39,10 @@ A web app that fetches customer data from Google Sheets and sends personalised S
 
 ![SMS Sender Preview](./assets/SMS.png)
 
+### Dark Theme Preview
+
+![SMS Sender Preview](./assets/Dark.png)
+
 ## Setup
 
 ```bash
