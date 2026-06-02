@@ -1,334 +1,603 @@
-
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 
 export default function CustomersPage() {
-
-  // STATES
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState("");
   const [sheetId, setSheetId] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // PAGINATION
   const [currentPage, setCurrentPage] = useState(1);
 
   const customersPerPage = 5;
 
-  // FETCH ALL CUSTOMERS
+  // Fetch Customers
   const fetchCustomers = async () => {
-
     try {
-
       setLoading(true);
 
-      const response = await api.get(
-        "/customers/listcustomers/"
-      );
+      const res = await api.get("/customers/listcustomers/");
+      setCustomers(res.data);
 
-      setCustomers(response.data);
-
-    } catch (error) {
-
-      toast.error("Failed to load customers");
-
+    } catch (err) {
+      toast.error("Unable to fetch customers");
     } finally {
-
       setLoading(false);
-
     }
   };
 
-  // SEARCH CUSTOMERS
+  // Search
   const searchCustomers = async () => {
 
-    // IF SEARCH EMPTY -> LOAD ALL
-    if (search === "") {
+    if (!search.trim()) {
       fetchCustomers();
       return;
     }
 
     try {
-
       setLoading(true);
 
-      const response = await api.get(
+      const res = await api.get(
         `/customers/search/?search=${search}`
       );
 
-      setCustomers(response.data);
-
+      setCustomers(res.data);
       setCurrentPage(1);
 
-    } catch (error) {
-
+    } catch (err) {
       toast.error("Search failed");
-
     } finally {
-
       setLoading(false);
-
     }
   };
 
-  // SYNC CUSTOMERS
+  // Sync
   const syncCustomers = async () => {
 
-    if (sheetId === "") {
-      toast.error("Enter Sheet ID");
+    if (!sheetId.trim()) {
+      toast.error("Please enter sheet ID");
       return;
     }
 
     try {
-
       setLoading(true);
 
-      const response = await api.post(
-        "/customers/sync/",
-        {
-          sheet_id: sheetId
-        }
-      );
+      const res = await api.post("/customers/sync/", {
+        sheet_id: sheetId,
+      });
 
-      toast.success(response.data.message);
+      toast.success(res.data.message);
 
-      // REFRESH TABLE
       await fetchCustomers();
 
-      // CLEAR INPUT
       setSheetId("");
-
-      // RESET PAGE
       setCurrentPage(1);
 
-    } catch (error) {
-
+    } catch (err) {
       toast.error(
-        error.response?.data?.error ||
-        "Sync failed"
+        err.response?.data?.error || "Sync failed"
       );
-
     } finally {
-
       setLoading(false);
-
     }
   };
 
-  // ENTER KEY SEARCH
-  const handleKeyDown = (e) => {
+  // Pagination
+  const lastIndex = currentPage * customersPerPage;
+  const firstIndex = lastIndex - customersPerPage;
 
+  const currentCustomers = customers.slice(
+    firstIndex,
+    lastIndex
+  );
+
+  const totalPages = Math.ceil(
+    customers.length / customersPerPage
+  );
+
+  // Enter Search
+  const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       searchCustomers();
     }
   };
 
 
-
-  // PAGINATION LOGIC
-  const lastIndex =
-    currentPage * customersPerPage;
-
-  const firstIndex =
-    lastIndex - customersPerPage;
-
-  const currentCustomers =
-    customers.slice(firstIndex, lastIndex);
-
-  const totalPages =
-    Math.ceil(customers.length / customersPerPage);
-
   return (
+    <div
+      className="
+    min-h-screen
+    bg-gray-50
+    dark:bg-[#0f0f0f]
 
-    <div className="p-6 bg-white min-h-screen">
+    p-6
 
-      <h1 className="text-2xl font-bold mb-5">
-        Customers
-      </h1>
+    transition-colors
+    duration-300
+  "
+    >
 
-      {/* SEARCH */}
-      <div className="flex gap-3 mb-4">
+      {/* Header */}
+      <div className="mb-8">
 
-        <input
-          type="text"
-          placeholder="Search customer"
-          value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
-          onKeyDown={handleKeyDown}
-          className="border px-3 py-2 rounded w-full"
-        />
+        <h1
+          className="
+        text-3xl
+        font-semibold
 
-        <button
-          onClick={searchCustomers}
-          className="bg-blue-600 text-white px-4 rounded"
+        text-gray-800
+        dark:text-[#e5e5e5]
+      "
         >
-          Search
-        </button>
+          Customers
+        </h1>
+
+        <p
+          className="
+        text-sm
+        mt-1
+
+        text-gray-500
+        dark:text-[#9ca3af]
+      "
+        >
+          Manage your customer records
+        </p>
 
       </div>
 
-      {/* SYNC */}
-      <div className="flex gap-3 mb-5">
+      {/* Search + Actions */}
+      <div
+        className="
+      bg-white
+      dark:bg-[#181818]
 
-        <input
-          type="text"
-          placeholder="Enter Google Sheet ID"
-          value={sheetId}
-          onChange={(e) =>
-            setSheetId(e.target.value)
-          }
-          className="border px-3 py-2 rounded w-full"
-        />
+      border
+      border-gray-200
+      dark:border-[#2a2a2a]
 
-        <button
-          onClick={syncCustomers}
-          className="bg-black text-white px-4 rounded"
-        >
-          Sync
-        </button>
-        <button
-          onClick={fetchCustomers}
-          className="bg-black text-white px-4 rounded"
-        >
-        Show old Customers
-        </button>
+      rounded-xl
+      p-4
+      mb-6
+
+      transition-colors
+      duration-300
+    "
+      >
+
+        <div className="flex flex-col md:flex-row gap-3">
+
+          <input
+            type="text"
+            placeholder="Search customer..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="
+          flex-1
+
+          px-4 py-2
+
+          rounded-lg
+          outline-none
+
+          border
+          border-gray-200
+          dark:border-[#2a2a2a]
+
+          bg-white
+          dark:bg-[#151515]
+
+          text-gray-800
+          dark:text-[#e5e5e5]
+
+          placeholder:text-gray-400
+          dark:placeholder:text-[#6b7280]
+
+          focus:border-gray-400
+          dark:focus:border-[#3a3a3a]
+
+          transition-colors
+        "
+          />
+
+          <button
+            onClick={searchCustomers}
+            className="
+          px-5 py-2
+
+          rounded-lg
+
+          bg-gray-900
+          dark:bg-[#222222]
+
+          text-white
+          dark:text-[#e5e5e5]
+
+          hover:bg-black
+          dark:hover:bg-[#2a2a2a]
+
+          transition-colors
+        "
+          >
+            Search
+          </button>
+
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-3 mt-4">
+
+          <input
+            type="text"
+            placeholder="Google Sheet ID"
+            value={sheetId}
+            onChange={(e) => setSheetId(e.target.value)}
+            className="
+          flex-1
+
+          px-4 py-2
+
+          rounded-lg
+          outline-none
+
+          border
+          border-gray-200
+          dark:border-[#2a2a2a]
+
+          bg-white
+          dark:bg-[#151515]
+
+          text-gray-800
+          dark:text-[#e5e5e5]
+
+          placeholder:text-gray-400
+          dark:placeholder:text-[#6b7280]
+
+          focus:border-gray-400
+          dark:focus:border-[#3a3a3a]
+
+          transition-colors
+        "
+          />
+
+          <button
+            onClick={syncCustomers}
+            className="
+          px-5 py-2
+
+          rounded-lg
+
+          border
+          border-gray-300
+          dark:border-[#2a2a2a]
+
+          bg-white
+          dark:bg-[#181818]
+
+          text-gray-700
+          dark:text-[#e5e5e5]
+
+          hover:bg-gray-100
+          dark:hover:bg-[#1c1c1c]
+
+          transition-colors
+        "
+          >
+            Sync
+          </button>
+
+          <button
+            onClick={fetchCustomers}
+            className="
+          px-5 py-2
+
+          rounded-lg
+
+          border
+          border-gray-300
+          dark:border-[#2a2a2a]
+
+          bg-white
+          dark:bg-[#181818]
+
+          text-gray-700
+          dark:text-[#e5e5e5]
+
+          hover:bg-gray-100
+          dark:hover:bg-[#1c1c1c]
+
+          transition-colors
+        "
+          >
+            Refresh
+          </button>
+
+        </div>
 
       </div>
 
-      {/* TABLE */}
-      <div className="border rounded overflow-hidden">
+      {/* Table */}
+      <div
+        className="
+      bg-white
+      dark:bg-[#181818]
 
-        <table className="w-full">
+      border
+      border-gray-200
+      dark:border-[#2a2a2a]
 
-          <thead className="bg-gray-100">
+      rounded-xl
+      overflow-hidden
 
-            <tr>
+      transition-colors
+      duration-300
+    "
+      >
 
-              <th className="text-left p-3">
-                P_ID
-              </th>
+        <div className="overflow-x-auto">
 
-              <th className="text-left p-3">
-                Name
-              </th>
+          <table className="w-full">
 
-              <th className="text-left p-3">
-                Mobile
-              </th>
+            <thead
+              className="
+            border-b
 
-              <th className="text-left p-3">
-                Amount
-              </th>
+            bg-gray-50
+            dark:bg-[#151515]
 
-              <th className="text-left p-3">
-                Due Date
-              </th>
+            border-gray-200
+            dark:border-[#2a2a2a]
+          "
+            >
 
-            </tr>
+              <tr
+                className="
+              text-sm
 
-          </thead>
+              text-gray-600
+              dark:text-[#9ca3af]
+            "
+              >
 
-          <tbody>
+                <th className="text-left px-6 py-4 font-medium">
+                  P_ID
+                </th>
 
-            {loading ? (
+                <th className="text-left px-6 py-4 font-medium">
+                  Name
+                </th>
 
-              <tr>
+                <th className="text-left px-6 py-4 font-medium">
+                  Mobile
+                </th>
 
-                <td
-                  colSpan="5"
-                  className="text-center p-5"
-                >
-                  Loading...
-                </td>
+                <th className="text-left px-6 py-4 font-medium">
+                  Amount
+                </th>
+
+                <th className="text-left px-6 py-4 font-medium">
+                  Due Date
+                </th>
 
               </tr>
 
-            ) : currentCustomers.length === 0 ? (
+            </thead>
 
-              <tr>
+            <tbody>
 
-                <td
-                  colSpan="5"
-                  className="text-center p-5"
-                >
-                  No customers found
-                </td>
+              {loading ? (
 
-              </tr>
+                <tr>
+                  <td
+                    colSpan="5"
+                    className="
+                  text-center
+                  py-12
 
-            ) : (
-
-              currentCustomers.map((customer) => (
-
-                <tr
-                  key={customer.p_id}
-                  className="border-t"
-                >
-
-                  <td className="p-3">
-                    {customer.p_id}
+                  text-gray-400
+                  dark:text-[#9ca3af]
+                "
+                  >
+                    Loading...
                   </td>
-
-                  <td className="p-3">
-                    {customer.cust_name}
-                  </td>
-
-                  <td className="p-3">
-                    {customer.mobile_number}
-                  </td>
-
-                  <td className="p-3">
-                    {customer.amount}
-                  </td>
-
-                  <td className="p-3">
-                    {customer.due_date}
-                  </td>
-
                 </tr>
 
-              ))
+              ) : currentCustomers.length === 0 ? (
 
-            )}
+                <tr>
+                  <td
+                    colSpan="5"
+                    className="
+                  text-center
+                  py-12
 
-          </tbody>
+                  text-gray-400
+                  dark:text-[#9ca3af]
+                "
+                  >
+                    No customers found
+                  </td>
+                </tr>
 
-        </table>
+              ) : (
+
+                currentCustomers.map((customer) => (
+
+                  <tr
+                    key={customer.p_id}
+                    className="
+                  border-b
+                  last:border-none
+
+                  border-gray-200
+                  dark:border-[#2a2a2a]
+
+                  hover:bg-gray-50
+                  dark:hover:bg-[#1c1c1c]
+
+                  transition-colors
+                "
+                  >
+
+                    <td
+                      className="
+                    px-6 py-4
+                    text-sm
+
+                    text-gray-600
+                    dark:text-[#9ca3af]
+                  "
+                    >
+                      {customer.p_id}
+                    </td>
+
+                    <td
+                      className="
+                    px-6 py-4
+                    font-medium
+
+                    text-gray-800
+                    dark:text-[#e5e5e5]
+                  "
+                    >
+                      {customer.cust_name}
+                    </td>
+
+                    <td
+                      className="
+                    px-6 py-4
+                    text-sm
+
+                    text-gray-600
+                    dark:text-[#9ca3af]
+                  "
+                    >
+                      {customer.mobile_number}
+                    </td>
+
+                    <td
+                      className="
+                    px-6 py-4
+                    font-medium
+
+                    text-gray-800
+                    dark:text-[#e5e5e5]
+                  "
+                    >
+                      ₹ {customer.amount}
+                    </td>
+
+                    <td
+                      className="
+                    px-6 py-4
+                    text-sm
+
+                    text-gray-600
+                    dark:text-[#9ca3af]
+                  "
+                    >
+                      {customer.due_date}
+                    </td>
+
+                  </tr>
+
+                ))
+
+              )}
+
+            </tbody>
+
+          </table>
+
+        </div>
 
       </div>
 
-      {/* PAGINATION */}
-      <div className="flex justify-end gap-3 mt-5">
+      {/* Pagination */}
+      <div className="flex items-center justify-between mt-5">
 
-        <button
-          onClick={() =>
-            setCurrentPage(currentPage - 1)
-          }
-          disabled={currentPage === 1}
-          className="border px-3 py-1 rounded"
+        <p
+          className="
+        text-sm
+
+        text-gray-500
+        dark:text-[#9ca3af]
+      "
         >
-          Prev
-        </button>
-
-        <span>
           {currentPage} / {totalPages || 1}
-        </span>
+        </p>
 
-        <button
-          onClick={() =>
-            setCurrentPage(currentPage + 1)
-          }
-          disabled={
-            currentPage === totalPages ||
-            totalPages === 0
-          }
-          className="border px-3 py-1 rounded"
-        >
-          Next
-        </button>
+        <div className="flex gap-2">
+
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => prev - 1)
+            }
+            disabled={currentPage === 1}
+            className="
+          px-4 py-2
+
+          rounded-lg
+          text-sm
+
+          border
+          border-gray-300
+          dark:border-[#2a2a2a]
+
+          bg-white
+          dark:bg-[#181818]
+
+          text-gray-700
+          dark:text-[#e5e5e5]
+
+          hover:bg-gray-100
+          dark:hover:bg-[#1c1c1c]
+
+          disabled:opacity-50
+
+          transition-colors
+        "
+          >
+            Prev
+          </button>
+
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => prev + 1)
+            }
+            disabled={
+              currentPage === totalPages ||
+              totalPages === 0
+            }
+            className="
+          px-4 py-2
+
+          rounded-lg
+          text-sm
+
+          border
+          border-gray-300
+          dark:border-[#2a2a2a]
+
+          bg-white
+          dark:bg-[#181818]
+
+          text-gray-700
+          dark:text-[#e5e5e5]
+
+          hover:bg-gray-100
+          dark:hover:bg-[#1c1c1c]
+
+          disabled:opacity-50
+
+          transition-colors
+        "
+          >
+            Next
+          </button>
+
+        </div>
 
       </div>
 

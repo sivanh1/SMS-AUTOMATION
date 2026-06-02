@@ -79,101 +79,288 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
 
-      <div className="w-full max-w-4xl bg-white border border-gray-200 rounded-lg shadow-sm grid grid-cols-1 md:grid-cols-2 overflow-hidden">
+  <div
+    className="
+      min-h-screen
 
-        {/* Left Side */}
-        <div className="hidden md:flex items-center justify-center bg-gray-50 p-8">
+      bg-gray-100
+      dark:bg-[#0f0f0f]
 
-          <img
-            src={login}
-            alt="login"
-            className="w-full max-w-sm"
-          />
+      flex items-center justify-center
 
-        </div>
+      px-4
 
-        {/* Right Side */}
-        <div className="flex items-center justify-center p-8">
+      transition-colors
+      duration-300
+    "
+  >
 
-          <div className="w-full max-w-sm">
+    <div
+      className="
+        w-full
+        max-w-4xl
 
-            <div className="mb-6">
+        bg-white
+        dark:bg-[#181818]
 
-              <h1 className="text-2xl font-semibold text-gray-900">
-                Login
-              </h1>
+        border
+        border-gray-200
+        dark:border-[#2a2a2a]
 
-              <p className="text-sm text-gray-500 mt-1">
-                Sign in to your account
-              </p>
+        rounded-2xl
+
+        overflow-hidden
+
+        grid
+        grid-cols-1
+        md:grid-cols-2
+
+        transition-colors
+        duration-300
+      "
+    >
+
+      {/* Left Side */}
+      <div
+        className="
+          hidden
+          md:flex
+
+          items-center
+          justify-center
+
+          bg-gray-50
+          dark:bg-[#151515]
+
+          p-8
+
+          border-r
+          border-gray-200
+          dark:border-[#2a2a2a]
+
+          transition-colors
+          duration-300
+        "
+      >
+
+        <img
+          src={login}
+          alt="login"
+          className="
+            w-full
+            max-w-sm
+
+            opacity-90
+          "
+        />
+
+      </div>
+
+      {/* Right Side */}
+      <div className="flex items-center justify-center p-8">
+
+        <div className="w-full max-w-sm">
+
+          {/* Header */}
+          <div className="mb-6">
+
+            <h1
+              className="
+                text-3xl
+                font-semibold
+
+                text-gray-900
+                dark:text-[#e5e5e5]
+              "
+            >
+              Login
+            </h1>
+
+            <p
+              className="
+                text-sm
+                mt-1
+
+                text-gray-500
+                dark:text-[#9ca3af]
+              "
+            >
+              Sign in to your account
+            </p>
+
+          </div>
+
+          <form
+            onSubmit={handleLogin}
+            className="space-y-5"
+          >
+
+            {/* Username */}
+            <div>
+
+              <label
+                className="
+                  block
+                  text-sm
+                  mb-2
+
+                  text-gray-700
+                  dark:text-[#9ca3af]
+                "
+              >
+                Username
+              </label>
+
+              <input
+                type="text"
+                placeholder="Enter username"
+                value={username}
+                onChange={(e) =>
+                  setUsername(e.target.value)
+                }
+                className="
+                  w-full
+
+                  px-4 py-2.5
+
+                  rounded-lg
+                  outline-none
+
+                  border
+                  border-gray-300
+                  dark:border-[#2a2a2a]
+
+                  bg-white
+                  dark:bg-[#151515]
+
+                  text-gray-900
+                  dark:text-[#e5e5e5]
+
+                  placeholder:text-gray-400
+                  dark:placeholder:text-[#6b7280]
+
+                  focus:border-gray-400
+                  dark:focus:border-[#3a3a3a]
+
+                  transition-colors
+                "
+              />
 
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-5">
+            {/* Password */}
+            <div>
 
-              {/* Username */}
-              <div>
+              <label
+                className="
+                  block
+                  text-sm
+                  mb-2
 
-                <label className="block text-sm text-gray-700 mb-2">
-                  Username
-                </label>
-
-                <input
-                  type="text"
-                  placeholder="Enter username"
-                  value={username}
-                  onChange={(e) =>
-                    setUsername(e.target.value)
-                  }
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm outline-none focus:border-blue-500"
-                />
-
-              </div>
-
-              {/* Password */}
-              <div>
-
-                <label className="block text-sm text-gray-700 mb-2">
-                  Password
-                </label>
-
-                <input
-                  type="password"
-                  placeholder="Enter password"
-                  value={password}
-                  onChange={(e) =>
-                    setPassword(e.target.value)
-                  }
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm outline-none focus:border-blue-500"
-                />
-
-                {errorMessage && (
-                  <p className="text-red-500 text-sm mt-2">
-                    {errorMessage}
-                  </p>
-                )}
-
-              </div>
-
-              {/* Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-md transition disabled:opacity-50"
+                  text-gray-700
+                  dark:text-[#9ca3af]
+                "
               >
-                {loading ? "Signing in..." : "Login"}
-              </button>
+                Password
+              </label>
 
-            </form>
+              <input
+                type="password"
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
+                className="
+                  w-full
 
-          </div>
+                  px-4 py-2.5
+
+                  rounded-lg
+                  outline-none
+
+                  border
+                  border-gray-300
+                  dark:border-[#2a2a2a]
+
+                  bg-white
+                  dark:bg-[#151515]
+
+                  text-gray-900
+                  dark:text-[#e5e5e5]
+
+                  placeholder:text-gray-400
+                  dark:placeholder:text-[#6b7280]
+
+                  focus:border-gray-400
+                  dark:focus:border-[#3a3a3a]
+
+                  transition-colors
+                "
+              />
+
+              {errorMessage && (
+
+                <p
+                  className="
+                    text-sm
+                    mt-2
+
+                    text-red-500
+                  "
+                >
+                  {errorMessage}
+                </p>
+
+              )}
+
+            </div>
+
+            {/* Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="
+                w-full
+
+                py-2.5
+
+                rounded-lg
+
+                bg-gray-900
+                dark:bg-[#222222]
+
+                text-white
+                dark:text-[#e5e5e5]
+
+                font-medium
+                text-sm
+
+                hover:bg-black
+                dark:hover:bg-[#2a2a2a]
+
+                disabled:opacity-50
+
+                transition-colors
+              "
+            >
+
+              {loading
+                ? "Signing in..."
+                : "Login"}
+
+            </button>
+
+          </form>
 
         </div>
 
       </div>
 
     </div>
-  );
+
+  </div>
+
+);
 }

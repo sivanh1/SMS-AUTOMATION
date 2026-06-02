@@ -60,162 +60,379 @@ export default function LogsPage() {
 
   return (
 
-    <div className="p-6 bg-white min-h-screen">
+    <div
+      className="
+    min-h-screen
 
-      <h1 className="text-2xl font-semibold mb-6">
-        SMS Logs
-      </h1>
+    bg-gray-50
+    dark:bg-[#0f0f0f]
 
-      {/* TABLE */}
+    p-6
 
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+    transition-colors
+    duration-300
+  "
+    >
 
-        <table className="w-full text-sm">
+      {/* Header */}
+      <div className="mb-8">
 
-          <thead className="bg-gray-100">
+        <h1
+          className="
+        text-3xl
+        font-semibold
 
-            <tr>
+        text-gray-800
+        dark:text-[#e5e5e5]
+      "
+        >
+          SMS Logs
+        </h1>
 
-              <th className="text-left px-4 py-3 font-medium text-gray-600">
-                P_ID
-              </th>
+        <p
+          className="
+        text-sm
+        mt-1
 
-              <th className="text-left px-4 py-3 font-medium text-gray-600">
-                Customer
-              </th>
+        text-gray-500
+        dark:text-[#9ca3af]
+      "
+        >
+          View all sent SMS history
+        </p>
 
-              <th className="text-left px-4 py-3 font-medium text-gray-600">
-                Mobile
-              </th>
+      </div>
 
-              <th className="text-left px-4 py-3 font-medium text-gray-600">
-                Message
-              </th>
+      {/* Table */}
+      <div
+        className="
+      bg-white
+      dark:bg-[#181818]
 
-              <th className="text-left px-4 py-3 font-medium text-gray-600">
-                Sent By
-              </th>
+      border
+      border-gray-200
+      dark:border-[#2a2a2a]
 
-              <th className="text-left px-4 py-3 font-medium text-gray-600">
-                Status
-              </th>
+      rounded-xl
+      overflow-hidden
 
-              <th className="text-left px-4 py-3 font-medium text-gray-600">
-                Date
-              </th>
+      transition-colors
+      duration-300
+    "
+      >
 
-            </tr>
+        <div className="overflow-x-auto">
 
-          </thead>
+          <table className="w-full">
 
-          <tbody>
+            <thead
+              className="
+            bg-gray-50
+            dark:bg-[#151515]
 
-            {loading ? (
+            border-b
+            border-gray-200
+            dark:border-[#2a2a2a]
+          "
+            >
 
-              <tr>
+              <tr
+                className="
+              text-sm
 
-                <td
-                  colSpan="7"
-                  className="text-center py-6"
-                >
-                  Loading...
-                </td>
+              text-gray-600
+              dark:text-[#9ca3af]
+            "
+              >
+
+                <th className="text-left px-6 py-4 font-medium">
+                  P_ID
+                </th>
+
+                <th className="text-left px-6 py-4 font-medium">
+                  Customer
+                </th>
+
+                <th className="text-left px-6 py-4 font-medium">
+                  Mobile
+                </th>
+
+                <th className="text-left px-6 py-4 font-medium">
+                  Message
+                </th>
+
+                <th className="text-left px-6 py-4 font-medium">
+                  Sent By
+                </th>
+
+                <th className="text-left px-6 py-4 font-medium">
+                  Status
+                </th>
+
+                <th className="text-left px-6 py-4 font-medium">
+                  Date
+                </th>
 
               </tr>
 
-            ) : logs.length === 0 ? (
+            </thead>
 
-              <tr>
+            <tbody>
 
-                <td
-                  colSpan="7"
-                  className="text-center py-6"
-                >
-                  No logs found
-                </td>
+              {loading ? (
 
-              </tr>
+                <tr>
 
-            ) : (
+                  <td
+                    colSpan="7"
+                    className="
+                  text-center
+                  py-10
 
-              currentLogs.map((log) => (
-
-                <tr
-                  key={log.id}
-                  className="border-t hover:bg-gray-50"
-                >
-
-                  <td className="px-4 py-3 text-gray-700">
-                    {log.customer?.p_id}
-                  </td>
-
-                  <td className="px-4 py-3 font-medium text-gray-800">
-                    {log.customer?.cust_name}
-                  </td>
-
-                  <td className="px-4 py-3 text-gray-700">
-                    {log.customer?.mobile_number}
-                  </td>
-
-                  <td className="px-4 py-3 text-gray-700">
-                    {log.message}
-                  </td>
-
-                  <td className="px-4 py-3 text-gray-700">
-                    {log.sent_by?.username}
-                  </td>
-
-                  <td className="px-4 py-3 text-gray-700">
-                    {log.status}
-                  </td>
-
-                  <td className="px-4 py-3 text-gray-700">
-
-                    {new Date(
-                      log.created_at
-                    ).toLocaleDateString()}
-
+                  text-gray-400
+                  dark:text-[#9ca3af]
+                "
+                  >
+                    Loading logs...
                   </td>
 
                 </tr>
 
-              ))
+              ) : logs.length === 0 ? (
 
-            )}
+                <tr>
 
-          </tbody>
+                  <td
+                    colSpan="7"
+                    className="
+                  text-center
+                  py-10
 
-        </table>
+                  text-gray-400
+                  dark:text-[#9ca3af]
+                "
+                  >
+                    No logs found
+                  </td>
+
+                </tr>
+
+              ) : (
+
+                currentLogs.map((log) => (
+
+                  <tr
+                    key={log.id}
+                    className="
+                  border-b
+                  last:border-none
+
+                  border-gray-200
+                  dark:border-[#2a2a2a]
+
+                  hover:bg-gray-50
+                  dark:hover:bg-[#1c1c1c]
+
+                  transition-colors
+                "
+                  >
+
+                    <td
+                      className="
+                    px-6 py-4
+                    text-sm
+
+                    text-gray-600
+                    dark:text-[#9ca3af]
+                  "
+                    >
+                      {log.customer?.p_id}
+                    </td>
+
+                    <td
+                      className="
+                    px-6 py-4
+                    font-medium
+
+                    text-gray-800
+                    dark:text-[#e5e5e5]
+                  "
+                    >
+                      {log.customer?.cust_name}
+                    </td>
+
+                    <td
+                      className="
+                    px-6 py-4
+                    text-sm
+
+                    text-gray-600
+                    dark:text-[#9ca3af]
+                  "
+                    >
+                      {log.customer?.mobile_number}
+                    </td>
+
+                    <td
+                      className="
+                    px-6 py-4
+                    text-sm
+                    max-w-xs
+
+                    text-gray-600
+                    dark:text-[#9ca3af]
+                  "
+                    >
+                      <p className="line-clamp-2">
+                        {log.message}
+                      </p>
+                    </td>
+
+                    <td
+                      className="
+                    px-6 py-4
+                    text-sm
+
+                    text-gray-600
+                    dark:text-[#9ca3af]
+                  "
+                    >
+                      {log.sent_by?.username}
+                    </td>
+
+                    <td className="px-6 py-4">
+
+                      <span
+                        className="
+                      text-xs
+
+                      px-3 py-1
+
+                      rounded-full
+
+                      bg-gray-100
+                      dark:bg-[#222222]
+
+                      text-gray-700
+                      dark:text-[#e5e5e5]
+                    "
+                      >
+                        {log.status}
+                      </span>
+
+                    </td>
+
+                    <td
+                      className="
+                    px-6 py-4
+                    text-sm
+
+                    text-gray-600
+                    dark:text-[#9ca3af]
+                  "
+                    >
+
+                      {new Date(
+                        log.created_at
+                      ).toLocaleDateString()}
+
+                    </td>
+
+                  </tr>
+
+                ))
+
+              )}
+
+            </tbody>
+
+          </table>
+
+        </div>
 
       </div>
 
       {/* Pagination */}
+      <div className="flex items-center justify-between mt-5">
 
-      <div className="flex justify-end items-center gap-3 mt-4">
+        <p
+          className="
+        text-sm
 
-        <button
-          disabled={currentPage === 1}
-          onClick={() =>
-            setCurrentPage(currentPage - 1)
-          }
-          className="border border-gray-300 px-3 py-1 rounded text-sm disabled:opacity-50"
+        text-gray-500
+        dark:text-[#9ca3af]
+      "
         >
-          Prev
-        </button>
+          {currentPage} / {totalPages || 1}
+        </p>
 
-        <span className="text-sm text-gray-600">
-          {currentPage} / {totalPages}
-        </span>
+        <div className="flex gap-2">
 
-        <button
-          disabled={currentPage >= totalPages}
-          onClick={() =>
-            setCurrentPage(currentPage + 1)
-          }
-          className="border border-gray-300 px-3 py-1 rounded text-sm disabled:opacity-50"
-        >
-          Next
-        </button>
+          <button
+            disabled={currentPage === 1}
+            onClick={() =>
+              setCurrentPage(currentPage - 1)
+            }
+            className="
+          px-4 py-2
+
+          rounded-lg
+          text-sm
+
+          border
+          border-gray-300
+          dark:border-[#2a2a2a]
+
+          bg-white
+          dark:bg-[#181818]
+
+          text-gray-700
+          dark:text-[#e5e5e5]
+
+          hover:bg-gray-100
+          dark:hover:bg-[#1c1c1c]
+
+          disabled:opacity-50
+
+          transition-colors
+        "
+          >
+            Prev
+          </button>
+
+          <button
+            disabled={currentPage >= totalPages}
+            onClick={() =>
+              setCurrentPage(currentPage + 1)
+            }
+            className="
+          px-4 py-2
+
+          rounded-lg
+          text-sm
+
+          border
+          border-gray-300
+          dark:border-[#2a2a2a]
+
+          bg-white
+          dark:bg-[#181818]
+
+          text-gray-700
+          dark:text-[#e5e5e5]
+
+          hover:bg-gray-100
+          dark:hover:bg-[#1c1c1c]
+
+          disabled:opacity-50
+
+          transition-colors
+        "
+          >
+            Next
+          </button>
+
+        </div>
 
       </div>
 

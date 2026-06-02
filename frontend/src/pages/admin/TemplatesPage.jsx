@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import api from "../../services/api";
 
 export default function TemplatesPage() {
+
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -15,30 +16,40 @@ export default function TemplatesPage() {
   const [editingId, setEditingId] =
     useState(null);
 
+  // FETCH TEMPLATES
   const fetchTemplates = async () => {
+
     try {
 
       setLoading(true);
 
-      const response =
+      const res =
         await api.get("/templates/");
 
-      setTemplates(response.data);
+      setTemplates(res.data);
 
-    } catch (error) {
+    } catch (err) {
 
-      toast.error("Failed to fetch templates");
+      toast.error(
+        "Unable to fetch templates"
+      );
 
     } finally {
 
       setLoading(false);
-
     }
   };
 
+  // CREATE TEMPLATE
   const handleCreate = async () => {
-    if (!templateName || !message) {
-      toast.error("Please fill all fields");
+
+    if (
+      !templateName.trim() ||
+      !message.trim()
+    ) {
+      toast.error(
+        "Please fill all fields"
+      );
       return;
     }
 
@@ -52,21 +63,26 @@ export default function TemplatesPage() {
         }
       );
 
-      toast.success("Template created");
+      toast.success(
+        "Template created"
+      );
 
       setTemplateName("");
       setMessage("");
 
       fetchTemplates();
 
-    } catch (error) {
+    } catch (err) {
 
-      toast.error("Failed to create template");
-
+      toast.error(
+        "Failed to create template"
+      );
     }
   };
 
+  // EDIT TEMPLATE
   const handleEdit = (template) => {
+
     setEditingId(template.id);
 
     setTemplateName(template.name);
@@ -79,7 +95,9 @@ export default function TemplatesPage() {
     });
   };
 
+  // UPDATE TEMPLATE
   const handleUpdate = async () => {
+
     try {
 
       await api.put(
@@ -90,25 +108,35 @@ export default function TemplatesPage() {
         }
       );
 
-      toast.success("Template updated");
+      toast.success(
+        "Template updated"
+      );
 
       setEditingId(null);
 
       setTemplateName("");
+
       setMessage("");
 
       fetchTemplates();
 
-    } catch (error) {
+    } catch (err) {
 
-      toast.error("Failed to update template");
-
+      toast.error(
+        "Failed to update template"
+      );
     }
   };
 
+  // DELETE TEMPLATE
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete template?"))
-      return;
+
+    const confirmDelete =
+      window.confirm(
+        "Delete this template?"
+      );
+
+    if (!confirmDelete) return;
 
     try {
 
@@ -116,18 +144,23 @@ export default function TemplatesPage() {
         `/templates/delete/${id}/`
       );
 
-      toast.success("Template deleted");
+      toast.success(
+        "Template deleted"
+      );
 
       fetchTemplates();
 
-    } catch (error) {
+    } catch (err) {
 
-      toast.error("Failed to delete template");
-
+      toast.error(
+        "Delete failed"
+      );
     }
   };
 
+  // CANCEL EDIT
   const cancelEdit = () => {
+
     setEditingId(null);
 
     setTemplateName("");
@@ -140,142 +173,424 @@ export default function TemplatesPage() {
   }, []);
 
   return (
-    <div className="p-6 bg-white min-h-screen">
 
-      <h1 className="text-2xl font-semibold mb-6">
+  <div
+    className="
+      min-h-screen
+
+      bg-gray-50
+      dark:bg-[#0f0f0f]
+
+      p-6
+
+      transition-colors
+      duration-300
+    "
+  >
+
+    {/* HEADER */}
+    <div className="mb-8">
+
+      <h1
+        className="
+          text-3xl
+          font-semibold
+
+          text-gray-900
+          dark:text-[#e5e5e5]
+        "
+      >
         SMS Templates
       </h1>
 
-      {/* Form */}
-      <div className="border border-gray-300 p-4 rounded mb-6">
+      <p
+        className="
+          text-sm
+          mt-1
 
-        <h2 className="text-lg mb-4">
-          {editingId
-            ? "Update Template"
-            : "Create Template"}
-        </h2>
+          text-gray-500
+          dark:text-[#9ca3af]
+        "
+      >
+        Create and manage message templates
+      </p>
 
-        <div className="flex flex-col gap-3">
+    </div>
 
-          <input
-            type="text"
-            placeholder="Template name"
-            value={templateName}
-            onChange={(e) =>
-              setTemplateName(e.target.value)
-            }
-            className="border border-gray-300 px-3 py-2 rounded text-sm"
-          />
+    {/* FORM */}
+    <div
+      className="
+        bg-white
+        dark:bg-[#181818]
 
-          <textarea
-            rows="4"
-            placeholder="Enter message"
-            value={message}
-            onChange={(e) =>
-              setMessage(e.target.value)
-            }
-            className="border border-gray-300 px-3 py-2 rounded text-sm resize-none"
-          />
+        border
+        border-gray-200
+        dark:border-[#2a2a2a]
 
-          <div className="flex gap-2">
+        rounded-xl
 
-            {editingId ? (
-              <>
-                <button
-                  onClick={handleUpdate}
-                  className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
-                >
-                  Update
-                </button>
+        p-5
+        mb-6
 
-                <button
-                  onClick={cancelEdit}
-                  className="border px-4 py-2 rounded text-sm"
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
+        transition-colors
+        duration-300
+      "
+    >
+
+      <h2
+        className="
+          text-lg
+          font-medium
+          mb-4
+
+          text-gray-900
+          dark:text-[#e5e5e5]
+        "
+      >
+
+        {editingId
+          ? "Update Template"
+          : "Create Template"}
+
+      </h2>
+
+      <div className="space-y-4">
+
+        {/* TEMPLATE NAME */}
+        <input
+          type="text"
+          placeholder="Template name"
+          value={templateName}
+          onChange={(e) =>
+            setTemplateName(e.target.value)
+          }
+          className="
+            w-full
+
+            px-4 py-3
+
+            rounded-lg
+
+            outline-none
+
+            bg-white
+            dark:bg-[#121212]
+
+            border
+            border-gray-200
+            dark:border-[#2a2a2a]
+
+            text-gray-900
+            dark:text-[#e5e5e5]
+
+            placeholder:text-gray-400
+            dark:placeholder:text-[#777]
+
+            focus:border-gray-400
+            dark:focus:border-[#444]
+
+            transition-colors
+          "
+        />
+
+        {/* MESSAGE */}
+        <textarea
+          rows="5"
+          placeholder="Enter your message..."
+          value={message}
+          onChange={(e) =>
+            setMessage(e.target.value)
+          }
+          className="
+            w-full
+
+            px-4 py-3
+
+            rounded-lg
+
+            outline-none
+            resize-none
+
+            bg-white
+            dark:bg-[#121212]
+
+            border
+            border-gray-200
+            dark:border-[#2a2a2a]
+
+            text-gray-900
+            dark:text-[#e5e5e5]
+
+            placeholder:text-gray-400
+            dark:placeholder:text-[#777]
+
+            focus:border-gray-400
+            dark:focus:border-[#444]
+
+            transition-colors
+          "
+        />
+
+        {/* ACTIONS */}
+        <div className="flex gap-3">
+
+          {editingId ? (
+            <>
+
               <button
-                onClick={handleCreate}
-                className="bg-black text-white px-4 py-2 rounded text-sm"
-              >
-                Create
-              </button>
-            )}
+                onClick={handleUpdate}
+                className="
+                  px-5 py-2
 
-          </div>
+                  rounded-lg
+
+                  bg-gray-900
+                  dark:bg-[#222222]
+
+                  text-white
+
+                  hover:bg-black
+                  dark:hover:bg-[#2c2c2c]
+
+                  transition
+                "
+              >
+                Update
+              </button>
+
+              <button
+                onClick={cancelEdit}
+                className="
+                  px-5 py-2
+
+                  rounded-lg
+
+                  border
+                  border-gray-300
+                  dark:border-[#2a2a2a]
+
+                  text-gray-700
+                  dark:text-[#9ca3af]
+
+                  hover:bg-gray-100
+                  dark:hover:bg-[#1c1c1c]
+
+                  transition
+                "
+              >
+                Cancel
+              </button>
+
+            </>
+          ) : (
+
+            <button
+              onClick={handleCreate}
+              className="
+                px-5 py-2
+
+                rounded-lg
+
+                bg-gray-900
+                dark:bg-[#222222]
+
+                text-white
+
+                hover:bg-black
+                dark:hover:bg-[#2c2c2c]
+
+                transition
+              "
+            >
+              Create
+            </button>
+
+          )}
 
         </div>
 
       </div>
 
-      {/* Templates */}
-      {loading ? (
+    </div>
 
-        <p>Loading...</p>
+    {/* TEMPLATE LIST */}
+    {loading ? (
 
-      ) : templates.length === 0 ? (
+      <div
+        className="
+          text-center
+          py-10
 
-        <p>No templates found</p>
+          text-gray-500
+          dark:text-[#9ca3af]
+        "
+      >
+        Loading templates...
+      </div>
 
-      ) : (
+    ) : templates.length === 0 ? (
 
-        <div className="space-y-4">
+      <div
+        className="
+          text-center
+          py-10
 
-          {templates.map((template) => (
+          text-gray-500
+          dark:text-[#9ca3af]
+        "
+      >
+        No templates found
+      </div>
 
-            <div
-              key={template.id}
-              className="border border-gray-300 p-4 rounded"
-            >
+    ) : (
 
-              <h2 className="font-medium">
+      <div className="space-y-4">
+
+        {templates.map((template) => (
+
+          <div
+            key={template.id}
+            className="
+              bg-white
+              dark:bg-[#181818]
+
+              border
+              border-gray-200
+              dark:border-[#2a2a2a]
+
+              rounded-xl
+
+              p-5
+
+              transition-colors
+              duration-300
+            "
+          >
+
+            {/* TOP */}
+            <div className="mb-4">
+
+              <h2
+                className="
+                  text-lg
+                  font-medium
+
+                  text-gray-900
+                  dark:text-[#e5e5e5]
+                "
+              >
                 {template.name}
               </h2>
 
-              <p className="text-sm text-gray-500 mb-3">
-                Created by: {template.created_by}
+              <p
+                className="
+                  text-sm
+                  mt-1
+
+                  text-gray-500
+                  dark:text-[#9ca3af]
+                "
+              >
+                Created by {template.created_by}
               </p>
-
-              <div className="border p-3 rounded bg-gray-50 mb-4">
-
-                <p className="text-sm whitespace-pre-wrap">
-                  {template.body}
-                </p>
-
-              </div>
-
-              <div className="flex gap-2">
-
-                <button
-                  onClick={() =>
-                    handleEdit(template)
-                  }
-                  className="border px-3 py-1 rounded text-sm"
-                >
-                  Edit
-                </button>
-
-                <button
-                  onClick={() =>
-                    handleDelete(template.id)
-                  }
-                  className="border px-3 py-1 rounded text-sm"
-                >
-                  Delete
-                </button>
-
-              </div>
 
             </div>
 
-          ))}
+            {/* MESSAGE */}
+            <div
+              className="
+                bg-gray-50
+                dark:bg-[#121212]
 
-        </div>
+                rounded-lg
 
-      )}
+                p-4
+                mb-4
+              "
+            >
 
-    </div>
-  );
+              <p
+                className="
+                  text-sm
+                  whitespace-pre-wrap
+                  leading-relaxed
+
+                  text-gray-700
+                  dark:text-[#d4d4d4]
+                "
+              >
+                {template.body}
+              </p>
+
+            </div>
+
+            {/* BUTTONS */}
+            <div className="flex gap-3">
+
+              <button
+                onClick={() =>
+                  handleEdit(template)
+                }
+                className="
+                  px-4 py-2
+
+                  rounded-lg
+
+                  text-sm
+
+                  border
+                  border-gray-300
+                  dark:border-[#2a2a2a]
+
+                  text-gray-700
+                  dark:text-[#9ca3af]
+
+                  hover:bg-gray-100
+                  dark:hover:bg-[#1c1c1c]
+
+                  transition
+                "
+              >
+                Edit
+              </button>
+
+              <button
+                onClick={() =>
+                  handleDelete(template.id)
+                }
+                className="
+                  px-4 py-2
+
+                  rounded-lg
+
+                  text-sm
+
+                  border
+                  border-gray-300
+                  dark:border-[#2a2a2a]
+
+                  text-gray-700
+                  dark:text-[#9ca3af]
+
+                  hover:bg-gray-100
+                  dark:hover:bg-[#1c1c1c]
+
+                  transition
+                "
+              >
+                Delete
+              </button>
+
+            </div>
+
+          </div>
+
+        ))}
+
+      </div>
+
+    )}
+
+  </div>
+);
 }

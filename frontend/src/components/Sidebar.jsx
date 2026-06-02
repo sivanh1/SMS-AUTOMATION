@@ -1,4 +1,8 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
 import {
   LayoutDashboard,
@@ -9,7 +13,13 @@ import {
   Send,
   UserCircle,
   Plus,
+  Moon,
+  Sun,
 } from "lucide-react";
+
+import {
+  useTheme,
+} from "../context/ThemeContext";
 
 export default function Sidebar() {
 
@@ -25,55 +35,146 @@ export default function Sidebar() {
   const navigate =
     useNavigate();
 
+  const {
+    darkMode,
+    toggleTheme,
+  } = useTheme();
+
+  // LOGOUT
   const handleLogout = () => {
 
     localStorage.clear();
 
     navigate("/");
-
   };
 
+  // NAVIGATION STYLE
   const navClass = (active) =>
-    `flex items-center gap-2 px-3 py-2 rounded-md text-sm transition ${
+    `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
       active
-        ? "bg-blue-100 text-blue-700"
-        : "text-gray-700 hover:bg-blue-50"
+        ? `
+          bg-gray-100
+          dark:bg-[#222222]
+
+          text-gray-900
+          dark:text-[#e5e5e5]
+        `
+        : `
+          text-gray-600
+          dark:text-[#9ca3af]
+
+          hover:bg-gray-100
+          dark:hover:bg-[#1c1c1c]
+
+          hover:text-gray-900
+          dark:hover:text-[#e5e5e5]
+        `
     }`;
 
   return (
 
-    <div className="w-56 min-h-screen bg-[#f0f7ff] border-r border-gray-200 p-4">
+    <div
+      className="
+        w-60
+        min-h-screen
+
+        bg-white
+        dark:bg-[#121212]
+
+        border-r
+        border-gray-200
+        dark:border-[#2a2a2a]
+
+        p-4
+
+        transition-colors
+        duration-300
+      "
+    >
 
       {/* LOGO */}
+      <div className="mb-8">
 
-      <div className="mb-6">
+        <h1
+          className="
+            text-2xl
+            font-semibold
 
-        <h1 className="text-xl font-semibold text-gray-800">
+            text-gray-900
+            dark:text-[#e5e5e5]
+          "
+        >
           SMS
         </h1>
 
-        <p className="text-sm text-gray-500">
+        <p
+          className="
+            text-sm
+
+            text-gray-500
+            dark:text-[#9ca3af]
+
+            mt-1
+          "
+        >
           Automation System
         </p>
 
       </div>
 
-      {/* USER */}
+      {/* USER CARD */}
+      <div
+        className="
+          flex items-center gap-3
 
-      <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-md p-3 mb-6">
+          bg-gray-50
+          dark:bg-[#181818]
+
+          border
+          border-gray-200
+          dark:border-[#2a2a2a]
+
+          rounded-xl
+
+          p-4
+          mb-8
+
+          transition-colors
+          duration-300
+        "
+      >
 
         <UserCircle
-          size={30}
-          className="text-gray-500"
+          size={34}
+          className="
+            text-gray-500
+            dark:text-[#9ca3af]
+          "
         />
 
         <div>
 
-          <p className="text-sm font-medium text-gray-800">
+          <p
+            className="
+              text-sm
+              font-medium
+
+              text-gray-900
+              dark:text-[#e5e5e5]
+            "
+          >
             {username}
           </p>
 
-          <p className="text-xs text-gray-500 capitalize">
+          <p
+            className="
+              text-xs
+              capitalize
+
+              text-gray-500
+              dark:text-[#9ca3af]
+            "
+          >
             {role}
           </p>
 
@@ -81,8 +182,7 @@ export default function Sidebar() {
 
       </div>
 
-      {/* ADMIN */}
-
+      {/* ADMIN MENU */}
       {role === "admin" && (
 
         <div className="space-y-1">
@@ -164,8 +264,7 @@ export default function Sidebar() {
 
       )}
 
-      {/* OPERATOR */}
-
+      {/* OPERATOR MENU */}
       {role === "operator" && (
 
         <div className="space-y-1">
@@ -202,20 +301,93 @@ export default function Sidebar() {
 
       )}
 
-      {/* LOGOUT */}
+      {/* FOOTER */}
+      <div className="mt-8 space-y-3">
 
-      <button
-        onClick={handleLogout}
-        className="flex items-center gap-2 mt-6 w-full px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-blue-50 transition"
-      >
+        {/* THEME BUTTON */}
+        <button
+          onClick={toggleTheme}
+          className="
+            flex items-center gap-3
 
-        <LogOut size={18} />
+            w-full
 
-        Logout
+            px-3 py-2.5
 
-      </button>
+            rounded-lg
+
+            text-sm
+
+            text-gray-600
+            dark:text-[#9ca3af]
+
+            border
+            border-gray-200
+            dark:border-[#2a2a2a]
+
+            hover:bg-gray-100
+            dark:hover:bg-[#1c1c1c]
+
+            hover:text-gray-900
+            dark:hover:text-[#e5e5e5]
+
+            transition-all
+            duration-200
+          "
+        >
+
+          {darkMode ? (
+            <Sun size={18} />
+          ) : (
+            <Moon size={18} />
+          )}
+
+          {darkMode
+            ? "Light Mode"
+            : "Dark Mode"}
+
+        </button>
+
+        {/* LOGOUT */}
+        <button
+          onClick={handleLogout}
+          className="
+            flex items-center gap-3
+
+            w-full
+
+            px-3 py-2.5
+
+            rounded-lg
+
+            text-sm
+
+            text-gray-600
+            dark:text-[#9ca3af]
+
+            border
+            border-gray-200
+            dark:border-[#2a2a2a]
+
+            hover:bg-gray-100
+            dark:hover:bg-[#1c1c1c]
+
+            hover:text-gray-900
+            dark:hover:text-[#e5e5e5]
+
+            transition-all
+            duration-200
+          "
+        >
+
+          <LogOut size={18} />
+
+          Logout
+
+        </button>
+
+      </div>
 
     </div>
-
   );
 }
