@@ -15,6 +15,7 @@ import {
   Plus,
   Moon,
   Sun,
+  MessageCircleMore
 } from "lucide-react";
 
 import {
@@ -294,6 +295,18 @@ export default function Sidebar() {
             <Send size={18} />
 
             SMS Sender
+
+          </Link>
+          <Link
+            to="/operator/bulksms"
+            className={navClass(
+              location.pathname === "/operator/bulksms"
+            )}
+          >
+
+            <MessageCircleMore size={18} />
+
+            Bulk SMS
 
           </Link>
 

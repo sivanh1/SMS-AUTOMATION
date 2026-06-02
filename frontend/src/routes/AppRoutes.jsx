@@ -22,6 +22,8 @@ import SmsSenderPage from "../pages/operator/SmsSenderPage";
 
 import Users from "../pages/admin/UsersPage"
 
+import BulkSMS from "../pages/operator/BulkSMS";
+
 export default function AppRoutes() {
 
   return (
@@ -105,6 +107,10 @@ export default function AppRoutes() {
           <Route
             path="customers"
             element={<CustomersPage />}
+          />
+          <Route
+            path="bulksms"
+            element={<BulkSMS />}
           />
 
         </Route>
