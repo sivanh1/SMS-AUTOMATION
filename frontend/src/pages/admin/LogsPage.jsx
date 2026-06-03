@@ -246,7 +246,7 @@ export default function LogsPage() {
                     dark:text-[#9ca3af]
                   "
                     >
-                      {log.customer?.p_id}
+                      {log.p_id}
                     </td>
 
                     <td
@@ -258,7 +258,7 @@ export default function LogsPage() {
                     dark:text-[#e5e5e5]
                   "
                     >
-                      {log.customer?.cust_name}
+                      {log.cust_name}
                     </td>
 
                     <td
@@ -270,7 +270,7 @@ export default function LogsPage() {
                     dark:text-[#9ca3af]
                   "
                     >
-                      {log.customer?.mobile_number}
+                      {log.mobile_number}
                     </td>
 
                     <td

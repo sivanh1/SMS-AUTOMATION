@@ -11,6 +11,7 @@ export default function SmsSenderPage() {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const fetchTemplates = async () => {
     try {
@@ -22,19 +23,48 @@ export default function SmsSenderPage() {
   };
 
   const findCustomer = async () => {
+
     if (!pId) {
-      toast.error("Enter P ID");
+
+      setErrorMessage("Enter P_ID");
+
       return;
     }
+
     try {
+
       setLoading(true);
-      const response = await api.post("/customers/customer/", { p_id: pId });
+
+      setErrorMessage("");
+
+      const response = await api.post(
+
+        "/customers/customer/",
+
+        { p_id: pId }
+      );
+
       setCustomer(response.data);
-      toast.success("Customer found");
+
     } catch (error) {
+
       setCustomer(null);
-      toast.error("Customer not found");
+
+      if (error.response?.status === 404) {
+
+        setErrorMessage(
+          "Customer doesn't exist"
+        );
+
+      } else {
+
+        setErrorMessage(
+          "Failed to fetch customer"
+        );
+      }
+
     } finally {
+
       setLoading(false);
     }
   };
@@ -128,7 +158,7 @@ export default function SmsSenderPage() {
           text-gray-500
           dark:text-[#9ca3af]
         "
-        >
+        >3
           Send SMS using templates
         </p>
       </div>
@@ -221,6 +251,7 @@ export default function SmsSenderPage() {
           "
           />
 
+
           <button
             onClick={findCustomer}
             disabled={loading}
@@ -245,6 +276,20 @@ export default function SmsSenderPage() {
             {loading ? "Searching..." : "Search"}
           </button>
         </div>
+        {
+          errorMessage && (
+
+            <p
+              className="
+      mt-3
+      text-sm
+      text-red-500
+    "
+            >
+              {errorMessage}
+            </p>
+          )
+        }
       </div>
 
       {/* Customer Details */}
@@ -323,7 +368,7 @@ export default function SmsSenderPage() {
               </p>
 
               <p className="text-sm font-medium text-gray-800 dark:text-[#e5e5e5]">
-                ₹ {customer.amount}
+                {customer.amount}
               </p>
             </div>
 

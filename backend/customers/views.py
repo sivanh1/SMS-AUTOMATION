@@ -3,6 +3,11 @@ from rest_framework.response import Response
 from .models import Customer
 from services.google_sheets_service import get_sheet_data
 from django.db.models import Q
+from openpyxl import load_workbook
+
+from rest_framework.parsers import MultiPartParser
+
+from .serializer import XLSXUploadSerializer
 
 from .serializer import CustomerSerializer
 from services.template_engine import generate_sms_preview
@@ -24,7 +29,6 @@ def list_customers(request):
     return Response(serializer.data)
 
 
-#SYNC CUSTOMERS
 #SYNC CUSTOMERS
 @api_view(['POST'])
 def sync_customers(request):
@@ -87,6 +91,130 @@ def sync_customers(request):
             "error": "Check Sheet ID"
 
         }, status=404)
+    
+    
+# IMPORT CUSTOMERS FROM XLSX
+# IMPORT CUSTOMERS FROM XLSX
+@api_view(['POST'])
+def import_customers_xlsx(request):
+
+    serializer = XLSXUploadSerializer(
+        data=request.data
+    )
+
+    if not serializer.is_valid():
+
+        return Response(
+            serializer.errors,
+            status=400
+        )
+
+    file = serializer.validated_data['file']
+
+    try:
+
+        workbook = load_workbook(file)
+
+        sheet = workbook.active
+
+        customers = []
+
+        # SKIP HEADER ROW
+        for row in sheet.iter_rows(
+            min_row=2,
+            values_only=True
+        ):
+
+            p_id, cust_name, mobile_number, amount, due_date = row
+
+            # SKIP EMPTY ROWS
+            if not p_id:
+                continue
+
+
+            # FORMAT P_ID
+            if p_id is not None:
+
+                if isinstance(
+                    p_id,
+                    float
+                ):
+
+                    p_id = int(p_id)
+
+                p_id = str(p_id)
+
+
+            # FORMAT MOBILE NUMBER
+            if mobile_number is not None:
+
+                if isinstance(
+                    mobile_number,
+                    float
+                ):
+
+                    mobile_number = int(
+                        mobile_number
+                    )
+
+                mobile_number = str(
+                    mobile_number
+                )
+
+
+            # FORMAT DUE DATE
+            if due_date is not None:
+
+                due_date = due_date.strftime(
+                    "%Y-%m-%d"
+                )
+
+
+            customers.append(
+
+                Customer(
+
+                    p_id=p_id,
+
+                    cust_name=cust_name,
+
+                    mobile_number=mobile_number,
+
+                    amount=amount or 0,
+
+                    due_date=due_date or None,
+                )
+            )
+
+        # DELETE OLD CUSTOMERS
+        Customer.objects.all().delete()
+
+        # BULK INSERT
+        Customer.objects.bulk_create(customers)
+
+        return Response({
+
+            "message":
+            "Customers imported successfully",
+
+            "total_imported":
+            len(customers)
+
+        })
+
+    except Exception as error:
+
+        print(
+            "XLSX IMPORT ERROR:",
+            error
+        )
+
+        return Response({
+
+            "error":
+            "Failed to import XLSX file"
+
+        }, status=500)
     
 #SEARCH CUSTOMERS
 @api_view(['GET'])

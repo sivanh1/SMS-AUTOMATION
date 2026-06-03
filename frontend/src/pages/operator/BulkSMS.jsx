@@ -61,67 +61,87 @@ export default function BulkSMS() {
 
   const previewBulkSMS = async () => {
 
-    setErrorMessage("");
+setErrorMessage("");
+setFieldError("");
 
-    setFieldError("");
+if (!selectedTemplate) {
 
-    if (!selectedTemplate) {
 
-      setFieldError(
-        "Please select a template"
-      );
+setFieldError(
+  "Please select a template"
+);
 
-      return;
+return;
+
+
+}
+
+try {
+
+
+setLoading(true);
+
+const response =
+  await api.post(
+    "/sms/bulk/preview/",
+    {
+      template:
+        selectedTemplate
     }
+  );
 
-    try {
+const customers =
+  response.data.customers || [];
 
-      setLoading(true);
+setBulkPreview(customers);
 
-      const response =
-        await api.post(
-          "/sms/bulk/preview/",
-          {
-            template:
-              selectedTemplate
-          }
-        );
+// NO CUSTOMERS
+if (customers.length === 0) {
 
-      setBulkPreview(
-        response.data.customers
-      );
+  setErrorMessage(
+    "No customers available"
+  );
 
-      setSuccessMessage(
-        "Bulk preview generated successfully"
-      );
+  return;
+}
 
-      setTimeout(() => {
+// SUCCESS ONLY IF CUSTOMERS EXIST
+setSuccessMessage(
+  "Bulk preview generated successfully"
+);
 
-        setSuccessMessage("");
+setTimeout(() => {
 
-      }, 3000);
+  setSuccessMessage("");
 
-    } catch (error) {
+}, 3000);
 
-      console.log(
-        "Bulk Preview Error:",
-        error.response?.data
-      );
+} catch (error) {
 
-      setErrorMessage(
+console.log(
+  "Bulk Preview Error:",
+  error.response?.data
+);
 
-        error.response?.data?.error ||
+setErrorMessage(
 
-        error.response?.data?.detail ||
+  error.response?.data?.error ||
 
-        "Failed to generate preview"
-      );
+  error.response?.data?.detail ||
 
-    } finally {
+  "Failed to generate preview"
+);
 
-      setLoading(false);
-    }
-  };
+
+} finally {
+
+
+setLoading(false);
+
+
+}
+};
+
 
 
 

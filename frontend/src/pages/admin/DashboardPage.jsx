@@ -487,7 +487,7 @@ export default function DashboardPage() {
                       dark:text-[#e5e5e5]
                     "
                   >
-                    {log.customer?.cust_name}
+                    {log.cust_name}
                   </td>
 
                   <td
@@ -498,7 +498,7 @@ export default function DashboardPage() {
                       dark:text-[#9ca3af]
                     "
                   >
-                    {log.customer?.mobile_number}
+                    {log.mobile_number}
                   </td>
 
                   <td className="px-6 py-4">
@@ -511,8 +511,6 @@ export default function DashboardPage() {
 
                         rounded-full
 
-                        bg-gray-100
-                        dark:bg-[#222222]
 
                         text-gray-700
                         dark:text-[#e5e5e5]

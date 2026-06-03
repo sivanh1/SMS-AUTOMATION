@@ -7,3 +7,7 @@ class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = '__all__'
+
+class XLSXUploadSerializer(serializers.Serializer):
+
+    file = serializers.FileField()

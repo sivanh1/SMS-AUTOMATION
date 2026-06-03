@@ -49,16 +49,24 @@ def send_sms(request):
 
         sms_log = SMSLog.objects.create(
 
-            customer=customer,
+    p_id=customer.p_id,
 
-            sent_by=request.user
-            if request.user.is_authenticated
-            else None,
+    cust_name=customer.cust_name,
 
-            message=message,
+    mobile_number=customer.mobile_number,
 
-            status='logged'
-        )
+    amount=customer.amount,
+
+    due_date=customer.due_date,
+
+    sent_by=request.user
+    if request.user.is_authenticated
+    else None,
+
+    message=message,
+
+    status='logged'
+)
 
         print(
 
@@ -248,16 +256,24 @@ def send_bulk_sms(request):
 
             sms_log = SMSLog.objects.create(
 
-                customer=customer,
+    p_id=customer.p_id,
 
-                sent_by=request.user
-                if request.user.is_authenticated
-                else None,
+    cust_name=customer.cust_name,
 
-                message=item["message"],
+    mobile_number=customer.mobile_number,
 
-                status='logged'
-            )
+    amount=customer.amount,
+
+    due_date=customer.due_date,
+
+    sent_by=request.user
+    if request.user.is_authenticated
+    else None,
+
+    message=item["message"],
+
+    status='logged'
+)
 
             print(
 

@@ -5,6 +5,7 @@ from .views import search_customers
 from .views import get_customer
 from .views import preview_sms
 from .views import list_customers
+from .views import import_customers_xlsx
 urlpatterns = [
     path('sync/', sync_customers),
     path('search/', search_customers),
@@ -12,8 +13,9 @@ urlpatterns = [
     path('customer/', get_customer),
 
     path('preview/', preview_sms),
-    path(
-        'listcustomers/',
-        list_customers
-    ),
+
+    path('listcustomers/',list_customers),
+
+    path('import-xlsx/', import_customers_xlsx)
+    
 ]

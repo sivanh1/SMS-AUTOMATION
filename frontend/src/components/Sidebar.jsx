@@ -270,20 +270,7 @@ export default function Sidebar() {
 
         <div className="space-y-1">
 
-          <Link
-            to="/operator/customers"
-            className={navClass(
-              location.pathname.includes(
-                "/customers"
-              )
-            )}
-          >
-
-            <Users size={18} />
-
-            Customers
-
-          </Link>
+          
 
           <Link
             to="/operator"

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 
 import api from "../../services/api";
 
+import XLSXUpload from "../../components/XLSXUpload";
+
 export default function CustomersPage() {
 
   const [customers, setCustomers] = useState([]);
@@ -13,6 +15,7 @@ export default function CustomersPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [searchError, setSearchError] = useState("");
   const [sheetError, setSheetError] = useState("");
+  const [file, setFile] = useState(null);
 
 
 
@@ -137,7 +140,7 @@ export default function CustomersPage() {
 
 
 
-  // Sync Customers
+
   // Sync Customers
   const syncCustomers = async () => {
 
@@ -186,7 +189,7 @@ export default function CustomersPage() {
 
   setCustomers([]);
 
-  // ✅ Handle 404 properly
+  
   if (
     error.response?.status === 404 ||
     String(error.response?.data).includes("404")
@@ -213,7 +216,7 @@ export default function CustomersPage() {
   setLoading(false);
 }
   };
-
+  // IMPORT XLSX
 
 
   // Pagination
@@ -592,6 +595,9 @@ export default function CustomersPage() {
           </button>
 
         </div>
+        <XLSXUpload
+  fetchCustomers={fetchCustomers}
+/>
 
       </div>
 
