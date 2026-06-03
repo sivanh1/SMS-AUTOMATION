@@ -25,13 +25,13 @@ from .serializers import SMSLogSerializer
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-
 def send_sms(request):
 
     p_id = request.data.get("p_id")
 
     message = request.data.get("message")
 
+    # VALIDATE INPUTS
     if not p_id or not message:
 
         return Response({
@@ -43,31 +43,68 @@ def send_sms(request):
 
     try:
 
+        # GET CUSTOMER
         customer = Customer.objects.get(
             p_id=p_id
         )
 
+        mobile_number = str(
+            customer.mobile_number
+        ).strip()
+
+        # VALIDATE MOBILE NUMBER
+        if not mobile_number:
+
+            return Response({
+
+                "error":
+                "Customer mobile number is missing"
+
+            }, status=400)
+
+        # REMOVE .0 IF EXISTS
+        mobile_number = mobile_number.replace(
+            ".0",
+            ""
+        )
+
+        # CHECK NUMBER LENGTH
+        if (
+            not mobile_number.isdigit()
+            or
+            len(mobile_number) != 10
+        ):
+
+            return Response({
+
+                "error":
+                "Invalid mobile number"
+
+            }, status=400)
+
+        # CREATE SMS LOG
         sms_log = SMSLog.objects.create(
 
-    p_id=customer.p_id,
+            p_id=customer.p_id,
 
-    cust_name=customer.cust_name,
+            cust_name=customer.cust_name,
 
-    mobile_number=customer.mobile_number,
+            mobile_number=mobile_number,
 
-    amount=customer.amount,
+            amount=customer.amount,
 
-    due_date=customer.due_date,
+            due_date=customer.due_date,
 
-    sent_by=request.user
-    if request.user.is_authenticated
-    else None,
+            sent_by=request.user
+            if request.user.is_authenticated
+            else None,
 
-    message=message,
+            message=message,
 
-    status='logged'
-)
+            status='logged'
+        )
 
+        # CONSOLE LOG
         print(
 
             f'[{datetime.now()}] INFO: '
@@ -76,7 +113,7 @@ def send_sms(request):
 
             f'{{'
 
-            f'"to":"{customer.mobile_number}", '
+            f'"to":"{mobile_number}", '
 
             f'"p_id":"{customer.p_id}", '
 
@@ -94,6 +131,7 @@ def send_sms(request):
 
             "status":
             sms_log.status
+
         })
 
     except Customer.DoesNotExist:
@@ -107,14 +145,15 @@ def send_sms(request):
 
     except Exception as error:
 
+        print("SMS ERROR:", error)
+
         return Response({
 
             "error":
             str(error)
 
         }, status=500)
-
-
+    
 # SMS LOGS
 
 @api_view(['GET'])
@@ -132,6 +171,7 @@ def sms_logs(request):
     )
 
     return Response(serializer.data)
+
 # BULK SMS PREVIEW
 
 @api_view(['POST'])
@@ -225,7 +265,6 @@ def preview_bulk_sms(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-
 def send_bulk_sms(request):
 
     customers = request.data.get(
@@ -254,26 +293,97 @@ def send_bulk_sms(request):
                 p_id=item["p_id"]
             )
 
+            mobile_number = str(
+                customer.mobile_number
+            ).strip()
+
+            # REMOVE .0
+            mobile_number = mobile_number.replace(
+                ".0",
+                ""
+            )
+
+            # INVALID NUMBER
+            if (
+                not mobile_number
+                or
+                not mobile_number.isdigit()
+                or
+                len(mobile_number) != 10
+            ):
+
+                SMSLog.objects.create(
+
+                    p_id=customer.p_id,
+
+                    cust_name=customer.cust_name,
+
+                    mobile_number=mobile_number,
+
+                    amount=customer.amount,
+
+                    due_date=customer.due_date,
+
+                    sent_by=request.user
+                    if request.user.is_authenticated
+                    else None,
+
+                    message=item["message"],
+
+                    status='failed'
+                )
+
+                failed.append({
+
+                    "p_id":
+                    customer.p_id,
+
+                    "error":
+                    "Invalid mobile number"
+                })
+
+                print(
+
+                    f'[{datetime.now()}] ERROR: '
+
+                    f'[BULK_SMS] '
+
+                    f'{{'
+
+                    f'"to":"{mobile_number}", '
+
+                    f'"p_id":"{customer.p_id}", '
+
+                    f'"message":"{item["message"]}", '
+
+                    f'"status":"failed"'
+
+                    f'}}'
+                )
+
+                continue
+
+            # SUCCESS LOG
             sms_log = SMSLog.objects.create(
 
-    p_id=customer.p_id,
+                p_id=customer.p_id,
 
-    cust_name=customer.cust_name,
+                cust_name=customer.cust_name,
 
-    mobile_number=customer.mobile_number,
+                mobile_number=mobile_number,
 
-    amount=customer.amount,
+                amount=customer.amount,
 
-    due_date=customer.due_date,
+                due_date=customer.due_date,
 
-    sent_by=request.user
-    if request.user.is_authenticated
-    else None,
+                sent_by=request.user
+                if request.user.is_authenticated
+                else None,
 
-    message=item["message"],
+                message=item["message"],
 
-    status='logged'
-)
+                status='logged'
+            )
 
             print(
 
@@ -283,7 +393,7 @@ def send_bulk_sms(request):
 
                 f'{{'
 
-                f'"to":"{customer.mobile_number}", '
+                f'"to":"{mobile_number}", '
 
                 f'"p_id":"{customer.p_id}", '
 

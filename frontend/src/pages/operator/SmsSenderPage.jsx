@@ -109,8 +109,22 @@ export default function SmsSenderPage() {
       setPreviewMessage("");
       setTimeout(() => setSuccessMessage(""), 4000);
     } catch (error) {
-      toast.error("Failed to send SMS");
-    } finally {
+
+  console.log(
+    "SMS Send Error:",
+    error.response?.data
+  );
+
+  const errorMsg =
+
+    error.response?.data?.error ||
+
+    "Failed to send SMS";
+
+  setErrorMessage(errorMsg);
+
+  toast.error(errorMsg);
+} finally {
       setSending(false);
     }
   };

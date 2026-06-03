@@ -303,22 +303,36 @@ export default function LogsPage() {
                     <td className="px-6 py-4">
 
                       <span
-                        className="
-                      text-xs
+  className={`
+    text-xs
 
-                      px-3 py-1
+    px-3 py-1
 
-                      rounded-full
+    rounded-full
 
-                      bg-gray-100
-                      dark:bg-[#222222]
+    ${
+      log.status === "failed"
 
-                      text-gray-700
-                      dark:text-[#e5e5e5]
-                    "
-                      >
-                        {log.status}
-                      </span>
+        ? `
+          bg-red-100
+          dark:bg-red-950/30
+
+          text-red-600
+          dark:text-red-400
+        `
+
+        : `
+          bg-green-100
+          dark:bg-green-950/30
+
+          text-green-700
+          dark:text-green-400
+        `
+    }
+  `}
+>
+  {log.status}
+</span>
 
                     </td>
 
