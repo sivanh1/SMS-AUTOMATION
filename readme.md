@@ -15,11 +15,15 @@ A web app that fetches customer data from Google Sheets and sends personalised S
 | Role     | Access                                                 |
 | -------- | ------------------------------------------------------ |
 | Admin    | Dashboard, Customers, Templates, Logs, User Management |
-| Operator | SMS Sender, Customers                                  |
+| Operator | SMS Sender, Bulk SMS                                   |
 
-## Tables and API endpoints
+## Models and Relation
 
-![Table Structure](./assets/DB.png)
+![Models](./assets/Models.png)
+
+## API Endpoints
+
+![Models](./assets/Endpoints.png)
 
 ## Tech Stack
 
@@ -31,6 +35,14 @@ A web app that fetches customer data from Google Sheets and sends personalised S
 
 ## Preview
 
+### Dashboard Preview
+
+![Dashboard Preview](./assets/Dashboard.png)
+
+### Customer Sync Preview
+
+![Dashboard Preview](./assets/Customers.png)
+
 ### Templates Preview
 
 ![Templates Preview](./assets/Templates.png)
@@ -39,9 +51,6 @@ A web app that fetches customer data from Google Sheets and sends personalised S
 
 ![SMS Sender Preview](./assets/SMS.png)
 
-### Dark Theme Preview
-
-![SMS Sender Preview](./assets/Dark.png)
 
 ## Setup
 
