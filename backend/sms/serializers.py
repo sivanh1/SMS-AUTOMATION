@@ -7,8 +7,6 @@ class SMSLogSerializer(
     serializers.ModelSerializer
 ):
 
-    
-
     sent_by = serializers.SerializerMethodField()
 
     class Meta:
@@ -17,41 +15,37 @@ class SMSLogSerializer(
 
         fields = [
 
-'id',
+            'id',
 
-'p_id',
+            'p_id',
 
-'cust_name',
+            'cust_name',
 
-'mobile_number',
+            'mobile_number',
 
-'amount',
+            'extra_fields',
 
-'due_date',
+            'sent_by',
 
-'sent_by',
+            'message',
 
-'message',
+            'status',
 
-'status',
+            'created_at'
+        ]
 
-'created_at'
-
-]
-
-    
     def get_sent_by(self, obj):
 
         if obj.sent_by:
 
             return {
 
-                "username": obj.sent_by.username
-
+                "username":
+                obj.sent_by.username
             }
 
         return {
 
-            "username": "Unknown"
-
+            "username":
+            "Unknown"
         }

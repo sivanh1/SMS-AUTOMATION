@@ -1,73 +1,30 @@
-def generate_sms_preview(template, customer):
+def generate_sms_preview(
+    template,
+    customer
+):
 
     preview = template
 
-    # CUSTOMER NAME
-    cust_name = customer.get(
-        "cust_name"
-    )
+    for key, value in customer.items():
 
-    if not cust_name:
+        # DEFAULT VALUES
+        if key == "cust_name":
 
-        cust_name = "Customer"
+            if not value:
 
-    # AMOUNT
-    amount = customer.get(
-        "amount"
-    )
+                value = "Customer"
 
-    if (
-        amount is None
-        or
-        amount == ""
-    ):
+        else:
 
-        amount = "-"
+            if value is None or value == "":
 
-    # DUE DATE
-    due_date = customer.get(
-        "due_date"
-    )
+                value = "-"
 
-    if not due_date:
+        preview = preview.replace(
 
-        due_date = "-"
+            f"${key}",
 
-    # MOBILE NUMBER
-    mobile_number = customer.get(
-        "mobile_number",
-        ""
-    )
-
-    # P_ID
-    p_id = customer.get(
-        "p_id",
-        ""
-    )
-
-    preview = preview.replace(
-        "$cust_name",
-        str(cust_name)
-    )
-
-    preview = preview.replace(
-        "$amount",
-        str(amount)
-    )
-
-    preview = preview.replace(
-        "$due_date",
-        str(due_date)
-    )
-
-    preview = preview.replace(
-        "$mobile_number",
-        str(mobile_number)
-    )
-
-    preview = preview.replace(
-        "$p_id",
-        str(p_id)
-    )
+            str(value)
+        )
 
     return preview

@@ -85,24 +85,23 @@ def send_sms(request):
         # CREATE SMS LOG
         sms_log = SMSLog.objects.create(
 
-            p_id=customer.p_id,
+    p_id=customer.p_id,
 
-            cust_name=customer.cust_name,
+    cust_name=customer.cust_name,
 
-            mobile_number=mobile_number,
+    mobile_number=mobile_number,
 
-            amount=customer.amount,
+    extra_fields=
+    customer.extra_fields,
 
-            due_date=customer.due_date,
+    sent_by=request.user
+    if request.user.is_authenticated
+    else None,
 
-            sent_by=request.user
-            if request.user.is_authenticated
-            else None,
+    message=message,
 
-            message=message,
-
-            status='logged'
-        )
+    status='logged'
+)
 
         # CONSOLE LOG
         print(
@@ -174,12 +173,15 @@ def sms_logs(request):
 
 # BULK SMS PREVIEW
 
+# BULK SMS PREVIEW
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
-
 def preview_bulk_sms(request):
 
-    template = request.data.get("template")
+    template = request.data.get(
+        "template"
+    )
 
     if not template:
 
@@ -192,34 +194,31 @@ def preview_bulk_sms(request):
 
     try:
 
-        customers = Customer.objects.filter(
-            amount__gt=0
-        )
+        customers = Customer.objects.all()
 
         previews = []
 
         for customer in customers:
 
+            customer_data = {
+
+                "p_id":
+                customer.p_id,
+
+                "cust_name":
+                customer.cust_name,
+
+                "mobile_number":
+                customer.mobile_number,
+
+                **customer.extra_fields
+            }
+
             message = generate_sms_preview(
 
                 template,
 
-                {
-                    "cust_name":
-                    customer.cust_name,
-
-                    "amount":
-                    customer.amount,
-
-                    "due_date":
-                    customer.due_date,
-
-                    "mobile_number":
-                    customer.mobile_number,
-
-                    "p_id":
-                    customer.p_id
-                }
+                customer_data
             )
 
             previews.append({
@@ -233,11 +232,8 @@ def preview_bulk_sms(request):
                 "mobile_number":
                 customer.mobile_number,
 
-                "amount":
-                customer.amount,
-
-                "due_date":
-                customer.due_date,
+                "extra_fields":
+                customer.extra_fields,
 
                 "message":
                 message
@@ -253,6 +249,11 @@ def preview_bulk_sms(request):
         })
 
     except Exception as error:
+
+        print(
+            "BULK PREVIEW ERROR:",
+            error
+        )
 
         return Response({
 
@@ -314,24 +315,24 @@ def send_bulk_sms(request):
 
                 SMSLog.objects.create(
 
-                    p_id=customer.p_id,
+    p_id=customer.p_id,
 
-                    cust_name=customer.cust_name,
+    cust_name=customer.cust_name,
 
-                    mobile_number=mobile_number,
+    mobile_number=mobile_number,
 
-                    amount=customer.amount,
+    extra_fields=dict(
+        customer.extra_fields
+    ),
 
-                    due_date=customer.due_date,
+    sent_by=request.user
+    if request.user.is_authenticated
+    else None,
 
-                    sent_by=request.user
-                    if request.user.is_authenticated
-                    else None,
+    message=item["message"],
 
-                    message=item["message"],
-
-                    status='failed'
-                )
+    status='failed'
+)
 
                 failed.append({
 
@@ -366,24 +367,24 @@ def send_bulk_sms(request):
             # SUCCESS LOG
             sms_log = SMSLog.objects.create(
 
-                p_id=customer.p_id,
+    p_id=customer.p_id,
 
-                cust_name=customer.cust_name,
+    cust_name=customer.cust_name,
 
-                mobile_number=mobile_number,
+    mobile_number=mobile_number,
 
-                amount=customer.amount,
+    extra_fields=dict(
+        customer.extra_fields
+    ),
 
-                due_date=customer.due_date,
+    sent_by=request.user
+    if request.user.is_authenticated
+    else None,
 
-                sent_by=request.user
-                if request.user.is_authenticated
-                else None,
+    message=item["message"],
 
-                message=item["message"],
-
-                status='logged'
-            )
+    status='logged'
+)
 
             print(
 

@@ -16,6 +16,15 @@ export default function CustomersPage() {
   const [searchError, setSearchError] = useState("");
   const [sheetError, setSheetError] = useState("");
   const [file, setFile] = useState(null);
+  const dynamicColumns = customers.length > 0
+
+    ? Object.keys(
+
+      customers[0].extra_fields || {}
+
+    )
+
+    : [];
 
 
 
@@ -185,36 +194,36 @@ export default function CustomersPage() {
 
     } catch (error) {
 
-  console.log("Full Error:", error);
+      console.log("Full Error:", error);
 
-  setCustomers([]);
+      setCustomers([]);
 
-  
-  if (
-    error.response?.status === 404 ||
-    String(error.response?.data).includes("404")
-  ) {
 
-    setErrorMessage("Check Sheet ID");
+      if (
+        error.response?.status === 404 ||
+        String(error.response?.data).includes("404")
+      ) {
 
-  } else {
+        setErrorMessage("Check Sheet ID");
 
-    setErrorMessage(
+      } else {
 
-      error.response?.data?.error ||
+        setErrorMessage(
 
-      error.response?.data?.detail ||
+          error.response?.data?.error ||
 
-      error.message ||
+          error.response?.data?.detail ||
 
-      "Sync failed"
-    );
-  }
+          error.message ||
 
-} finally {
+          "Sync failed"
+        );
+      }
 
-  setLoading(false);
-}
+    } finally {
+
+      setLoading(false);
+    }
   };
   // IMPORT XLSX
 
@@ -596,8 +605,8 @@ export default function CustomersPage() {
 
         </div>
         <XLSXUpload
-  fetchCustomers={fetchCustomers}
-/>
+          fetchCustomers={fetchCustomers}
+        />
 
       </div>
 
@@ -621,184 +630,153 @@ export default function CustomersPage() {
 
         <div className="overflow-x-auto">
 
-          <table className="w-full">
-
+          <table className="w-full table-fixed border-collapse">
             <thead
               className="
-                border-b
-
-                bg-gray-50
-                dark:bg-[#151515]
-
-                border-gray-200
-                dark:border-[#2a2a2a]
-              "
+      border-b
+      bg-gray-50
+      dark:bg-[#151515]
+      border-gray-200
+      dark:border-[#2a2a2a]
+    "
             >
-
               <tr
                 className="
-                  text-sm
-
-                  text-gray-600
-                  dark:text-[#9ca3af]
-                "
+        text-sm
+        text-gray-600
+        dark:text-[#9ca3af]
+      "
               >
-
-                <th className="text-left px-6 py-4 font-medium">
+                <th className="w-24 text-left px-6 py-4 font-medium tracking-wide">
                   P_ID
                 </th>
-
-                <th className="text-left px-6 py-4 font-medium">
+                <th className="w-48 text-left px-6 py-4 font-medium tracking-wide">
                   Name
                 </th>
-
-                <th className="text-left px-6 py-4 font-medium">
+                <th className="w-40 text-left px-6 py-4 font-medium tracking-wide">
                   Mobile
                 </th>
-
-                <th className="text-left px-6 py-4 font-medium">
-                  Amount
-                </th>
-
-                <th className="text-left px-6 py-4 font-medium">
-                  Due Date
-                </th>
-
+                {dynamicColumns.map((column) => (
+                  <th
+                    key={column}
+                    className="text-left px-6 py-4 font-medium tracking-wide min-w-[150px]"
+                  >
+                    {column
+                      .replaceAll("_", " ")
+                      .replace(/\b\w/g, (char) => char.toUpperCase())}
+                  </th>
+                ))}
               </tr>
-
             </thead>
 
             <tbody>
-
               {loading ? (
-
                 <tr>
-
                   <td
-                    colSpan="5"
-
+                    colSpan={3 + dynamicColumns.length}
                     className="
-                      text-center
-                      py-12
-
-                      text-gray-400
-                      dark:text-[#9ca3af]
-                    "
+            text-center
+            py-12
+            text-sm
+            text-gray-400
+            dark:text-[#9ca3af]
+          "
                   >
                     Loading...
                   </td>
-
                 </tr>
-
               ) : currentCustomers.length === 0 ? (
-
                 <tr>
-
                   <td
-                    colSpan="5"
-
+                    colSpan={3 + dynamicColumns.length}
                     className="
-                      text-center
-                      py-12
-
-                      text-gray-400
-                      dark:text-[#9ca3af]
-                    "
+            text-center
+            py-12
+            text-sm
+            text-gray-400
+            dark:text-[#9ca3af]
+          "
                   >
                     No customers found
                   </td>
-
                 </tr>
-
               ) : (
-
                 currentCustomers.map((customer) => (
-
                   <tr
                     key={customer.p_id}
-
                     className="
-                      border-b
-                      last:border-none
-
-                      border-gray-200
-                      dark:border-[#2a2a2a]
-
-                      hover:bg-gray-50
-                      dark:hover:bg-[#1c1c1c]
-
-                      transition-colors
-                    "
+            border-b
+            last:border-none
+            border-gray-200
+            dark:border-[#2a2a2a]
+            hover:bg-gray-50
+            dark:hover:bg-[#1c1c1c]
+            transition-colors
+          "
                   >
-
                     <td
                       className="
-                        px-6 py-4
-                        text-sm
-
-                        text-gray-600
-                        dark:text-[#9ca3af]
-                      "
+              px-6 py-4
+              text-sm
+              font-mono
+              text-gray-600
+              dark:text-[#9ca3af]
+            "
                     >
                       {customer.p_id}
                     </td>
 
                     <td
                       className="
-                        px-6 py-4
-                        font-medium
-
-                        text-gray-800
-                        dark:text-[#e5e5e5]
-                      "
+              px-6 py-4
+              text-sm
+              font-medium
+              text-gray-800
+              dark:text-[#e5e5e5]
+            "
                     >
-                      {customer.cust_name}
+                      <div className="truncate max-w-[180px]" title={customer.cust_name}>
+                        {customer.cust_name}
+                      </div>
                     </td>
 
                     <td
                       className="
-                        px-6 py-4
-                        text-sm
-
-                        text-gray-600
-                        dark:text-[#9ca3af]
-                      "
+              px-6 py-4
+              text-sm
+              text-gray-600
+              dark:text-[#9ca3af]
+            "
                     >
                       {customer.mobile_number}
                     </td>
 
-                    <td
-                      className="
-                        px-6 py-4
-                        font-medium
-
-                        text-gray-800
-                        dark:text-[#e5e5e5]
-                      "
-                    >
-                      {customer.amount}
-                    </td>
-
-                    <td
-                      className="
-                        px-6 py-4
-                        text-sm
-
-                        text-gray-600
-                        dark:text-[#9ca3af]
-                      "
-                    >
-                      {customer.due_date}
-                    </td>
-
+                    {dynamicColumns.map((column) => (
+                      <td
+                        key={column}
+                        className="
+                px-6 py-4
+                text-sm
+                text-gray-600
+                dark:text-[#9ca3af]
+                align-top
+              "
+                      >
+                        {/* Flex wrapper creates a balanced indent and structure for arbitrary fields like messages */}
+                        <div className="flex items-start pl-1">
+                          <span
+                            className="block truncate max-w-[250px] whitespace-pre-wrap break-words"
+                            title={customer.extra_fields?.[column] ?? ""}
+                          >
+                            {customer.extra_fields?.[column] ?? "-"}
+                          </span>
+                        </div>
+                      </td>
+                    ))}
                   </tr>
-
                 ))
-
               )}
-
             </tbody>
-
           </table>
 
         </div>

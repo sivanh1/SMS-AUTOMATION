@@ -9,19 +9,19 @@ class Customer(models.Model):
     )
 
     cust_name = models.CharField(
-        max_length=255
+        max_length=255,
+        blank=True,
+        null=True
     )
+
     mobile_number = models.CharField(
-        max_length=20
+        max_length=20,
+        blank=True,
+        null=True
     )
 
-    amount = models.DecimalField(
-        max_digits=10,
-        decimal_places=2
-    )
-
-    due_date = models.CharField(
-        max_length=100
+    extra_fields = models.JSONField(
+        default=dict
     )
 
     sheet_id = models.CharField(
@@ -39,4 +39,8 @@ class Customer(models.Model):
     )
 
     def __str__(self):
-        return self.cust_name
+
+        return (
+            self.cust_name
+            or self.p_id
+        )

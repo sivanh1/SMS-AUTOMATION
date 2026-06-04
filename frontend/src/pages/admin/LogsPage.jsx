@@ -57,6 +57,28 @@ export default function LogsPage() {
   const totalPages = Math.ceil(
     logs.length / logsPerPage
   );
+  const MessageCell = ({ message }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Approximating length restriction. Adjust 60 characters to your preferred threshold.
+  const isLongMessage = message && message.length > 60; 
+
+  return (
+    <div className="text-sm max-w-xs text-gray-600 dark:text-[#9ca3af]">
+      <p className={isExpanded ? "" : "line-clamp-2"}>
+        {message}
+      </p>
+      {isLongMessage && (
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="text-xs font-semibold mt-1 text-blue-600 dark:text-blue-400 hover:underline focus:outline-none block"
+        >
+          {isExpanded ? "Read less" : "Read more"}
+        </button>
+      )}
+    </div>
+  );
+};
 
   return (
 
@@ -273,20 +295,9 @@ export default function LogsPage() {
                       {log.mobile_number}
                     </td>
 
-                    <td
-                      className="
-                    px-6 py-4
-                    text-sm
-                    max-w-xs
-
-                    text-gray-600
-                    dark:text-[#9ca3af]
-                  "
-                    >
-                      <p className="line-clamp-2">
-                        {log.message}
-                      </p>
-                    </td>
+                    <td className="px-6 py-4">
+  <MessageCell message={log.message} />
+</td>
 
                     <td
                       className="

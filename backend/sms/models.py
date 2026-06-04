@@ -12,7 +12,6 @@ class SMSLog(models.Model):
         ('failed', 'Failed'),
     )
 
-
     # SNAPSHOT CUSTOMER DATA
 
     p_id = models.CharField(
@@ -27,18 +26,9 @@ class SMSLog(models.Model):
         max_length=20
     )
 
-    amount = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
+    extra_fields = models.JSONField(
+        default=dict
     )
-
-    due_date = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
-
 
     # SMS DATA
 
@@ -53,7 +43,6 @@ class SMSLog(models.Model):
         default='logged'
     )
 
-
     # USER
 
     sent_by = models.ForeignKey(
@@ -65,12 +54,14 @@ class SMSLog(models.Model):
         null=True
     )
 
-
     created_at = models.DateTimeField(
         auto_now_add=True
     )
 
-
     def __str__(self):
 
-        return f"{self.cust_name} - {self.status}"
+        return (
+            f"{self.cust_name}"
+            f" - "
+            f"{self.status}"
+        )

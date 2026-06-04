@@ -110,21 +110,21 @@ export default function SmsSenderPage() {
       setTimeout(() => setSuccessMessage(""), 4000);
     } catch (error) {
 
-  console.log(
-    "SMS Send Error:",
-    error.response?.data
-  );
+      console.log(
+        "SMS Send Error:",
+        error.response?.data
+      );
 
-  const errorMsg =
+      const errorMsg =
 
-    error.response?.data?.error ||
+        error.response?.data?.error ||
 
-    "Failed to send SMS";
+        "Failed to send SMS";
 
-  setErrorMessage(errorMsg);
+      setErrorMessage(errorMsg);
 
-  toast.error(errorMsg);
-} finally {
+      toast.error(errorMsg);
+    } finally {
       setSending(false);
     }
   };
@@ -376,24 +376,65 @@ export default function SmsSenderPage() {
               </p>
             </div>
 
-            <div>
-              <p className="text-xs mb-1 text-gray-400 dark:text-[#6b7280]">
-                Amount
+            <div className="col-span-2">
+
+              <p
+                className="
+      text-xs
+      mb-2
+
+      text-gray-400
+      dark:text-[#6b7280]
+    "
+              >
+                Extra Details
               </p>
 
-              <p className="text-sm font-medium text-gray-800 dark:text-[#e5e5e5]">
-                {customer.amount}
-              </p>
-            </div>
+              <div
+                className="
+      flex
+      flex-wrap
+      gap-2
+    "
+              >
 
-            <div>
-              <p className="text-xs mb-1 text-gray-400 dark:text-[#6b7280]">
-                Due date
-              </p>
+                {customer.extra_fields &&
 
-              <p className="text-sm font-medium text-gray-800 dark:text-[#e5e5e5]">
-                {customer.due_date}
-              </p>
+                  Object.entries(
+                    customer.extra_fields
+                  ).map(
+
+                    ([key, value]) => (
+
+                      <div
+                        key={key}
+
+                        className="
+              px-3 py-1
+
+              rounded-lg
+
+              bg-gray-100
+              dark:bg-[#151515]
+
+              text-sm
+
+              text-gray-700
+              dark:text-[#d1d5db]
+            "
+                      >
+                        <strong>
+                          {key}
+                        </strong>
+
+                        : {String(value)}
+                      </div>
+                    )
+                  )
+                }
+
+              </div>
+
             </div>
           </div>
         </div>
