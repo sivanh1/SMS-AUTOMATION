@@ -5,11 +5,19 @@ import api from "../../services/api";
 export default function DashboardPage() {
 
   const [stats, setStats] = useState({
-    customers: 0,
-    users: 0,
-    templates: 0,
-    logs: 0,
-  });
+
+  customers: 0,
+
+  users: 0,
+
+  templates: 0,
+
+  logs: 0,
+
+  loggedCount: 0,
+
+  failedCount: 0,
+});
 
   const [recentLogs, setRecentLogs] =
     useState([]);
@@ -33,19 +41,40 @@ export default function DashboardPage() {
         api.get("/sms/logs/"),
       ]);
 
-      setStats({
-        customers:
-          customersRes.data.length,
+      const logs = logsRes.data;
 
-        users:
-          usersRes.data.length,
+const loggedCount = logs.filter(
 
-        templates:
-          templatesRes.data.length,
+  (log) =>
+    log.status === "logged"
 
-        logs:
-          logsRes.data.length,
-      });
+).length;
+
+const failedCount = logs.filter(
+
+  (log) =>
+    log.status === "failed"
+
+).length;
+
+setStats({
+
+  customers:
+    customersRes.data.length,
+
+  users:
+    usersRes.data.length,
+
+  templates:
+    templatesRes.data.length,
+
+  logs:
+    logs.length,
+
+  loggedCount,
+
+  failedCount,
+});
 
       setRecentLogs(
         logsRes.data.slice(0, 5)
@@ -321,6 +350,82 @@ export default function DashboardPage() {
           {loading
             ? "--"
             : stats.logs}
+            <div className="mt-4 space-y-2">
+
+  {/* Logged */}
+  <div className="flex items-center justify-between">
+
+    <p
+      className="
+        text-sm
+
+        text-gray-500
+        dark:text-[#9ca3af]
+      "
+    >
+      Logged
+    </p>
+
+    <span
+      className="
+        px-3 py-1
+
+        rounded-full
+
+        text-xs
+
+        bg-green-100
+        dark:bg-green-950/30
+
+        text-green-700
+        dark:text-green-400
+      "
+    >
+      {loading
+        ? "--"
+        : stats.loggedCount}
+    </span>
+
+  </div>
+
+
+  {/* Failed */}
+  <div className="flex items-center justify-between">
+
+    <p
+      className="
+        text-sm
+
+        text-gray-500
+        dark:text-[#9ca3af]
+      "
+    >
+      Failed
+    </p>
+
+    <span
+      className="
+        px-3 py-1
+
+        rounded-full
+
+        text-xs
+
+        bg-red-100
+        dark:bg-red-950/30
+
+        text-red-600
+        dark:text-red-400
+      "
+    >
+      {loading
+        ? "--"
+        : stats.failedCount}
+    </span>
+
+  </div>
+
+</div>
 
         </h2>
 

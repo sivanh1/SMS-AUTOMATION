@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Link,
   useLocation,
@@ -15,7 +16,8 @@ import {
   Plus,
   Moon,
   Sun,
-  MessageCircleMore
+  MessageCircleMore,
+  Menu 
 } from "lucide-react";
 
 import {
@@ -23,371 +25,219 @@ import {
 } from "../context/ThemeContext";
 
 export default function Sidebar() {
+  const [isOpen, setIsOpen] = useState(true);
 
-  const role =
-    localStorage.getItem("role");
+  const role = localStorage.getItem("role");
+  const username = localStorage.getItem("username");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { darkMode, toggleTheme } = useTheme();
 
-  const username =
-    localStorage.getItem("username");
-
-  const location =
-    useLocation();
-
-  const navigate =
-    useNavigate();
-
-  const {
-    darkMode,
-    toggleTheme,
-  } = useTheme();
-
-  // LOGOUT
   const handleLogout = () => {
-
     localStorage.clear();
-
     navigate("/");
   };
 
-  // NAVIGATION STYLE
+  // GMAIL MATERIAL 3 NAV STYLING
   const navClass = (active) =>
-    `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
+    `flex items-center text-sm transition-all duration-150 whitespace-nowrap group relative ${
+      isOpen 
+        ? "mx-3 px-6 py-2.5 rounded-full my-0.5 gap-4" 
+        : "h-12 w-12 mx-auto justify-center rounded-full my-1"
+    } ${
       active
         ? `
-          bg-gray-100
-          dark:bg-[#222222]
-
-          text-gray-900
-          dark:text-[#e5e5e5]
+          bg-[#d3e3fd] 
+          dark:bg-[#004b87] 
+          text-[#041e49] 
+          dark:text-[#e2e2e2] 
+          font-semibold
         `
         : `
-          text-gray-600
-          dark:text-[#9ca3af]
-
-          hover:bg-gray-100
-          dark:hover:bg-[#1c1c1c]
-
-          hover:text-gray-900
-          dark:hover:text-[#e5e5e5]
+          text-[#444746] 
+          dark:text-[#c4c7c5] 
+          hover:bg-gray-200/60 
+          dark:hover:bg-[#2d323f] 
+          font-medium
         `
     }`;
 
   return (
-
     <div
-      className="
-        w-60
-        min-h-screen
-
-        bg-white
-        dark:bg-[#121212]
-
+      className={`
+        h-screen
+        bg-[#f6f8fc]
+        dark:bg-[#1a1f2c]
         border-r
-        border-gray-200
-        dark:border-[#2a2a2a]
-
-        p-4
-
-        transition-colors
+        border-transparent
+        dark:border-[#2d323f]
+        py-4
+        transition-all
         duration-300
-      "
+        overflow-hidden
+        flex
+        flex-col
+        justify-between
+        sticky
+        top-0
+        ${isOpen ? "w-64" : "w-20"} 
+      `}
     >
-
-      {/* LOGO */}
-      <div className="mb-8">
-
-        <h1
-          className="
-            text-2xl
-            font-semibold
-
-            text-gray-900
-            dark:text-[#e5e5e5]
-          "
-        >
-          SMS
-        </h1>
-
-        <p
-          className="
-            text-sm
-
-            text-gray-500
-            dark:text-[#9ca3af]
-
-            mt-1
-          "
-        >
-          Automation System
-        </p>
-
-      </div>
-
-      {/* USER CARD */}
-      <div
-        className="
-          flex items-center gap-3
-
-          bg-gray-50
-          dark:bg-[#181818]
-
-          border
-          border-gray-200
-          dark:border-[#2a2a2a]
-
-          rounded-xl
-
-          p-4
-          mb-8
-
-          transition-colors
-          duration-300
-        "
-      >
-
-        <UserCircle
-          size={34}
-          className="
-            text-gray-500
-            dark:text-[#9ca3af]
-          "
-        />
-
-        <div>
-
-          <p
+      {/* TOP SECTION & SCROLLABLE NAV WRAPPER */}
+      <div className="flex flex-col flex-1 min-h-0">
+        
+        {/* HEADER SECTION (GMAIL BRAND LAYOUT) */}
+        <div className={`flex items-center mb-5 px-4 gap-3 flex-shrink-0 ${isOpen ? "justify-start" : "justify-center"}`}>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
             className="
-              text-sm
-              font-medium
-
-              text-gray-900
-              dark:text-[#e5e5e5]
+              p-2.5 
+              rounded-full 
+              text-[#444746] 
+              dark:text-[#c4c7c5] 
+              hover:bg-gray-200/70
+              dark:hover:bg-[#2d323f]
+              transition-colors
             "
           >
-            {username}
-          </p>
-
-          <p
-            className="
-              text-xs
-              capitalize
-
-              text-gray-500
-              dark:text-[#9ca3af]
-            "
-          >
-            {role}
-          </p>
-
-        </div>
-
-      </div>
-
-      {/* ADMIN MENU */}
-      {role === "admin" && (
-
-        <div className="space-y-1">
-
-          <Link
-            to="/admin"
-            className={navClass(
-              location.pathname === "/admin"
-            )}
-          >
-
-            <LayoutDashboard size={18} />
-
-            Dashboard
-
-          </Link>
-
-          <Link
-            to="/admin/customers"
-            className={navClass(
-              location.pathname.includes(
-                "/customers"
-              )
-            )}
-          >
-
-            <Users size={18} />
-
-            Customers
-
-          </Link>
-
-          <Link
-            to="/admin/templates"
-            className={navClass(
-              location.pathname.includes(
-                "/templates"
-              )
-            )}
-          >
-
-            <FileText size={18} />
-
-            Templates
-
-          </Link>
-
-          <Link
-            to="/admin/logs"
-            className={navClass(
-              location.pathname.includes(
-                "/logs"
-              )
-            )}
-          >
-
-            <ClipboardList size={18} />
-
-            Logs
-
-          </Link>
-
-          <Link
-            to="/admin/addusers"
-            className={navClass(
-              location.pathname.includes(
-                "/addusers"
-              )
-            )}
-          >
-
-            <Plus size={18} />
-
-            Add Users
-
-          </Link>
-
-        </div>
-
-      )}
-
-      {/* OPERATOR MENU */}
-      {role === "operator" && (
-
-        <div className="space-y-1">
-
+            <Menu size={20} />
+          </button>
           
-
-          <Link
-            to="/operator"
-            className={navClass(
-              location.pathname === "/operator"
-            )}
-          >
-
-            <Send size={18} />
-
-            SMS Sender
-
-          </Link>
-          <Link
-            to="/operator/bulksms"
-            className={navClass(
-              location.pathname === "/operator/bulksms"
-            )}
-          >
-
-            <MessageCircleMore size={18} />
-
-            Bulk SMS
-
-          </Link>
-
+          {isOpen && (
+            <div className="flex items-center gap-2 select-none animate-fadeIn">
+              <span className="text-xl font-semibold tracking-tight text-[#1f1f1f] dark:text-[#e3e3e3]">
+                SMS CRM
+              </span>
+            </div>
+          )}
         </div>
 
-      )}
-
-      {/* FOOTER */}
-      <div className="mt-8 space-y-3">
-
-        {/* THEME BUTTON */}
-        <button
-          onClick={toggleTheme}
-          className="
-            flex items-center gap-3
-
-            w-full
-
-            px-3 py-2.5
-
-            rounded-lg
-
-            text-sm
-
-            text-gray-600
-            dark:text-[#9ca3af]
-
+        {/* PROFILE BLOCK */}
+        <div
+          className={`
+            flex items-center
+            bg-white/80
+            dark:bg-[#222834]
             border
-            border-gray-200
-            dark:border-[#2a2a2a]
-
-            hover:bg-gray-100
-            dark:hover:bg-[#1c1c1c]
-
-            hover:text-gray-900
-            dark:hover:text-[#e5e5e5]
-
+            border-gray-200/60
+            dark:border-[#2d323f]
             transition-all
-            duration-200
-          "
+            duration-300
+            rounded-2xl
+            flex-shrink-0
+            ${isOpen ? "p-3 mx-4 gap-3 mb-5" : "p-2 mb-5 justify-center w-12 h-12 mx-auto"}
+          `}
         >
+          <UserCircle size={26} className="text-gray-400 dark:text-slate-400 flex-shrink-0" />
+          {isOpen && (
+            <div className="overflow-hidden whitespace-nowrap">
+              <p className="text-xs font-semibold text-gray-700 dark:text-[#e3e3e3] truncate">
+                {username || "Operator Active"}
+              </p>
+              <p className="text-[10px] uppercase tracking-wider font-bold text-[#0b57d0] dark:text-[#a8c7fa] mt-0.5">
+                {role}
+              </p>
+            </div>
+          )}
+        </div>
 
-          {darkMode ? (
-            <Sun size={18} />
-          ) : (
-            <Moon size={18} />
+        {/* INDEPENDENTLY SCROLLABLE NAVIGATION LINKS */}
+        <nav className="flex flex-col flex-1 overflow-y-auto no-scrollbar pb-4">
+          {/* ADMIN ENVIRONMENT */}
+          {role === "admin" && (
+            <>
+              <Link to="/admin" className={navClass(location.pathname === "/admin")} title="Dashboard">
+                <LayoutDashboard size={20} className="flex-shrink-0" />
+                {isOpen && <span>Dashboard</span>}
+              </Link>
+
+              <Link to="/admin/customers" className={navClass(location.pathname.includes("/customers"))} title="Customers">
+                <Users size={20} className="flex-shrink-0" />
+                {isOpen && <span>Customers</span>}
+              </Link>
+
+              <Link to="/admin/templates" className={navClass(location.pathname.includes("/templates"))} title="Templates">
+                <FileText size={20} className="flex-shrink-0" />
+                {isOpen && <span>Templates</span>}
+              </Link>
+
+              <Link to="/admin/logs" className={navClass(location.pathname.includes("/logs"))} title="Logs">
+                <ClipboardList size={20} className="flex-shrink-0" />
+                {isOpen && <span>Logs</span>}
+              </Link>
+
+              <Link to="/admin/addusers" className={navClass(location.pathname.includes("/addusers"))} title="Add Users">
+                <Plus size={20} className="flex-shrink-0" />
+                {isOpen && <span>Add Users</span>}
+              </Link>
+            </>
           )}
 
-          {darkMode
-            ? "Light Mode"
-            : "Dark Mode"}
+          {/* OPERATOR ENVIRONMENT */}
+          {role === "operator" && (
+            <>
+              
 
-        </button>
+              <Link to="/operator" className={navClass(location.pathname === "/operator")} title="SMS Sender">
+                <Send size={20} className="flex-shrink-0" />
+                {isOpen && <span>SMS Sender</span>}
+              </Link>
 
-        {/* LOGOUT */}
-        <button
-          onClick={handleLogout}
-          className="
-            flex items-center gap-3
-
-            w-full
-
-            px-3 py-2.5
-
-            rounded-lg
-
-            text-sm
-
-            text-gray-600
-            dark:text-[#9ca3af]
-
-            border
-            border-gray-200
-            dark:border-[#2a2a2a]
-
-            hover:bg-gray-100
-            dark:hover:bg-[#1c1c1c]
-
-            hover:text-gray-900
-            dark:hover:text-[#e5e5e5]
-
-            transition-all
-            duration-200
-          "
-        >
-
-          <LogOut size={18} />
-
-          Logout
-
-        </button>
-
+              <Link to="/operator/bulksms" className={navClass(location.pathname === "/operator/bulksms")} title="Bulk SMS">
+                <MessageCircleMore size={20} className="flex-shrink-0" />
+                {isOpen && <span>Bulk SMS</span>}
+              </Link>
+            </>
+          )}
+        </nav>
       </div>
 
+      {/* LOWER FOOTER CONFIG (Locked static at bottom) */}
+      <div className="flex flex-col gap-1 pt-2 mt-auto border-t border-gray-200/40 dark:border-[#2d323f]/40 flex-shrink-0">
+        {/* THEME CONTROL BUTTON */}
+        <button
+          onClick={toggleTheme}
+          title={darkMode ? "Light Mode" : "Dark Mode"}
+          className={`
+            flex items-center
+            text-sm
+            font-medium
+            text-[#444746]
+            dark:text-[#c4c7c5]
+            hover:bg-gray-200/60
+            dark:hover:bg-[#2d323f]
+            transition-all
+            duration-150
+            whitespace-nowrap
+            ${isOpen ? "mx-3 px-6 py-2.5 rounded-full gap-4 text-left" : "h-12 w-12 mx-auto justify-center rounded-full"}
+          `}
+        >
+          {darkMode ? <Sun size={20} className="flex-shrink-0 text-amber-500" /> : <Moon size={20} className="flex-shrink-0" />}
+          {isOpen && <span>Change Theme</span>}
+        </button>
+
+        {/* LOGOUT BUTTON */}
+        <button
+          onClick={handleLogout}
+          title="Logout"
+          className={`
+            flex items-center
+            text-sm
+            font-medium
+            text-rose-600
+            dark:text-rose-400
+            hover:bg-rose-50/60
+            dark:hover:bg-rose-950/20
+            transition-all
+            duration-150
+            whitespace-nowrap
+            ${isOpen ? "mx-3 px-6 py-2.5 rounded-full gap-4 text-left" : "h-12 w-12 mx-auto justify-center rounded-full"}
+          `}
+        >
+          <LogOut size={20} className="flex-shrink-0" />
+          {isOpen && <span>Logout Account</span>}
+        </button>
+      </div>
     </div>
   );
 }

@@ -224,7 +224,7 @@ def search_customers(request):
 
     customers = Customer.objects.filter(
 
-        Q(cust_name__icontains=search) |
+        Q(cust_name=search) |
         Q(p_id=search)
 
     )
