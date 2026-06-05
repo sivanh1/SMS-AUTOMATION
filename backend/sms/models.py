@@ -1,67 +1,42 @@
 from django.db import models
-
 from django.contrib.auth.models import User
 
-
 class SMSLog(models.Model):
-
+    # Added 'pending' for messages waiting for their scheduled time
     STATUS_CHOICES = (
-
+        ('pending', 'Pending'),
         ('logged', 'Logged'),
-
         ('failed', 'Failed'),
     )
 
-    # SNAPSHOT CUSTOMER DATA
-
-    p_id = models.CharField(
-        max_length=100
-    )
-
-    cust_name = models.CharField(
-        max_length=255
-    )
-
-    mobile_number = models.CharField(
-        max_length=20
-    )
-
-    extra_fields = models.JSONField(
-        default=dict
-    )
-
-    # SMS DATA
+    
+    p_id = models.CharField(max_length=100)
+    cust_name = models.CharField(max_length=255)
+    mobile_number = models.CharField(max_length=20)
+    extra_fields = models.JSONField(default=dict)
 
     message = models.TextField()
-
     status = models.CharField(
-
         max_length=20,
-
         choices=STATUS_CHOICES,
-
-        default='logged'
+        default='pending'  
     )
 
-    # USER
-
+  
     sent_by = models.ForeignKey(
-
         User,
-
         on_delete=models.SET_NULL,
-
-        null=True
+        null=True,
+        blank=True 
     )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    scheduled_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-
-        return (
-            f"{self.cust_name}"
-            f" - "
-            f"{self.status}"
-        )
+        return f"[{self.status.upper()}] {self.cust_name} - {self.mobile_number}"
+        
+    class Meta:
+        
+        ordering = ['-created_at']

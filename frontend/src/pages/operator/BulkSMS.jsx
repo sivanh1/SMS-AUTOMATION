@@ -13,6 +13,10 @@ export default function BulkSMS() {
   const [bulkPreview, setBulkPreview] =
     useState([]);
 
+  // NEW STATE FOR SCHEDULING
+  const [scheduledTime, setScheduledTime] = 
+    useState("");
+
   const [loading, setLoading] =
     useState(false);
 
@@ -61,91 +65,85 @@ export default function BulkSMS() {
 
   const previewBulkSMS = async () => {
 
-setErrorMessage("");
-setFieldError("");
+    setErrorMessage("");
+    setFieldError("");
 
-if (!selectedTemplate) {
+    if (!selectedTemplate) {
 
+      setFieldError(
+        "Please select a template"
+      );
 
-setFieldError(
-  "Please select a template"
-);
+      return;
 
-return;
-
-
-}
-
-try {
-
-
-setLoading(true);
-
-const response =
-  await api.post(
-    "/sms/bulk/preview/",
-    {
-      template:
-        selectedTemplate
     }
-  );
 
-const customers =
-  response.data.customers || [];
+    try {
 
-setBulkPreview(customers);
+      setLoading(true);
 
-// NO CUSTOMERS
-if (customers.length === 0) {
+      const response =
+        await api.post(
+          "/sms/bulk/preview/",
+          {
+            template:
+              selectedTemplate
+          }
+        );
 
-  setErrorMessage(
-    "No customers available"
-  );
+      const customers =
+        response.data.customers || [];
 
-  return;
-}
+      setBulkPreview(customers);
 
-// SUCCESS ONLY IF CUSTOMERS EXIST
-setSuccessMessage(
-  "Bulk preview generated successfully"
-);
+      // NO CUSTOMERS
+      if (customers.length === 0) {
 
-setTimeout(() => {
+        setErrorMessage(
+          "No customers available"
+        );
 
-  setSuccessMessage("");
+        return;
+      }
 
-}, 3000);
+      // SUCCESS ONLY IF CUSTOMERS EXIST
+      setSuccessMessage(
+        "Bulk preview generated successfully"
+      );
 
-} catch (error) {
+      setTimeout(() => {
 
-console.log(
-  "Bulk Preview Error:",
-  error.response?.data
-);
+        setSuccessMessage("");
 
-setErrorMessage(
+      }, 3000);
 
-  error.response?.data?.error ||
+    } catch (error) {
 
-  error.response?.data?.detail ||
+      console.log(
+        "Bulk Preview Error:",
+        error.response?.data
+      );
 
-  "Failed to generate preview"
-);
+      setErrorMessage(
+
+        error.response?.data?.error ||
+
+        error.response?.data?.detail ||
+
+        "Failed to generate preview"
+      );
+
+    } finally {
+
+      setLoading(false);
+
+    }
+  };
 
 
-} finally {
 
-
-setLoading(false);
-
-
-}
-};
-
-
-
-
-  const sendBulkSMS = async () => {
+  // MODIFIED TO HANDLE SCHEDULING
+  const sendBulkSMS = async (isScheduled = false) => {
 
     setErrorMessage("");
 
@@ -158,26 +156,43 @@ setLoading(false);
       return;
     }
 
+    if (isScheduled && !scheduledTime) {
+      
+      setErrorMessage(
+        "Please select a date and time to schedule"
+      );
+
+      return;
+    }
+
     try {
 
       setSending(true);
 
+      const payload = {
+        customers: bulkPreview
+      };
+
+      if (isScheduled && scheduledTime) {
+        payload.scheduled_time = new Date(scheduledTime).toISOString();
+      }
+
       await api.post(
         "/sms/bulk/send/",
-        {
-          customers:
-            bulkPreview
-        }
+        payload
       );
 
-      setSuccessMessage(
+      const msg = isScheduled
+        ? `Bulk SMS scheduled successfully for ${bulkPreview.length} customers`
+        : `SMS sent successfully to ${bulkPreview.length} customers`;
 
-        `SMS sent successfully to ${bulkPreview.length} customers`
-      );
+      setSuccessMessage(msg);
 
       setBulkPreview([]);
 
       setSelectedTemplate("");
+
+      setScheduledTime(""); // Reset schedule time
 
       setTimeout(() => {
 
@@ -489,10 +504,13 @@ setLoading(false);
           <div
             className="
               flex
-              items-center
+              flex-col
+              xl:flex-row
+              xl:items-center
               justify-between
+              gap-4
 
-              mb-5
+              mb-6
             "
           >
 
@@ -526,34 +544,100 @@ setLoading(false);
 
 
 
-            <button
-              onClick={sendBulkSMS}
+            {/* ACTION BUTTONS: SEND IMMEDIATELY OR SCHEDULE */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              
+              <button
+                onClick={() => sendBulkSMS(false)}
+                disabled={sending}
+                className="
+                  px-5 py-2
+                  rounded-lg
+                  whitespace-nowrap
 
-              disabled={sending}
+                  bg-gray-900
+                  dark:bg-[#222222]
 
-              className="
-                px-5 py-2
+                  text-white
+                  dark:text-[#e5e5e5]
 
-                rounded-lg
+                  hover:bg-black
+                  dark:hover:bg-[#2a2a2a]
 
-                bg-gray-900
-                dark:bg-[#222222]
+                  disabled:opacity-50
 
-                text-white
-                dark:text-[#e5e5e5]
+                  transition-colors
+                "
+              >
+                {sending ? "Sending..." : "Send Immediately"}
+              </button>
 
-                hover:bg-black
-                dark:hover:bg-[#2a2a2a]
+              {/* Divider */}
+              <div className="hidden sm:block w-px h-8 bg-gray-200 dark:bg-[#2a2a2a]"></div>
+              <div className="block sm:hidden h-px w-full bg-gray-200 dark:bg-[#2a2a2a]"></div>
 
-                disabled:opacity-50
+              {/* Schedule Inputs */}
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <input
+                  type="datetime-local"
+                  value={scheduledTime}
+                  onChange={(e) => setScheduledTime(e.target.value)}
+                  className="
+                    flex-1
+                    px-4 py-2
+                    rounded-lg
+                    outline-none
+                    text-sm
 
-                transition-colors
-              "
-            >
-              {sending
-                ? "Sending..."
-                : "Send All SMS"}
-            </button>
+                    border
+                    border-gray-200
+                    dark:border-[#2a2a2a]
+
+                    bg-white
+                    dark:bg-[#151515]
+
+                    text-gray-800
+                    dark:text-[#e5e5e5]
+
+                    focus:border-gray-400
+                    dark:focus:border-[#3a3a3a]
+
+                    transition-colors
+                  "
+                />
+
+                <button
+                  onClick={() => sendBulkSMS(true)}
+                  disabled={sending || !scheduledTime}
+                  className="
+                    px-5 py-2
+                    rounded-lg
+                    text-sm
+                    whitespace-nowrap
+
+                    border
+                    border-gray-300
+                    dark:border-[#2a2a2a]
+
+                    bg-white
+                    dark:bg-[#181818]
+
+                    text-gray-700
+                    dark:text-[#e5e5e5]
+
+                    hover:bg-gray-100
+                    dark:hover:bg-[#1c1c1c]
+
+                    disabled:opacity-50
+
+                    transition-colors
+                  "
+                >
+                  {sending ? "Scheduling..." : "Schedule All"}
+                </button>
+              </div>
+
+            </div>
 
           </div>
 
@@ -624,29 +708,8 @@ setLoading(false);
 
                   <div className="text-right">
 
-                    <p
-                      className="
-                        text-xs
-
-                        text-gray-400
-                        dark:text-[#6b7280]
-                      "
-                    >
-                      Amount
-                    </p>
-
-                    <p
-                      className="
-                        text-sm
-                        font-medium
-
-                        text-gray-800
-                        dark:text-[#e5e5e5]
-                      "
-                    >
-                      {customer.amount}
-                    </p>
-
+                    
+                    
                   </div>
 
                 </div>

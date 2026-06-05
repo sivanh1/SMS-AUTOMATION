@@ -8,6 +8,7 @@ export default function SmsSenderPage() {
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [previewMessage, setPreviewMessage] = useState("");
+  const [scheduledTime, setScheduledTime] = useState(""); // NEW STATE FOR SCHEDULING
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -23,48 +24,30 @@ export default function SmsSenderPage() {
   };
 
   const findCustomer = async () => {
-
     if (!pId) {
-
       setErrorMessage("Enter P_ID");
-
       return;
     }
 
     try {
-
       setLoading(true);
-
       setErrorMessage("");
 
       const response = await api.post(
-
         "/customers/customer/",
-
         { p_id: pId }
       );
 
       setCustomer(response.data);
-
     } catch (error) {
-
       setCustomer(null);
 
       if (error.response?.status === 404) {
-
-        setErrorMessage(
-          "Customer doesn't exist"
-        );
-
+        setErrorMessage("Customer doesn't exist");
       } else {
-
-        setErrorMessage(
-          "Failed to fetch customer"
-        );
+        setErrorMessage("Failed to fetch customer");
       }
-
     } finally {
-
       setLoading(false);
     }
   };
@@ -90,39 +73,59 @@ export default function SmsSenderPage() {
     }
   };
 
-  const sendSMS = async () => {
+  // MODIFIED TO HANDLE SCHEDULING
+  const sendSMS = async (isScheduled = false) => {
     if (!previewMessage) {
       toast.error("Generate preview first");
       return;
     }
+
+    if (isScheduled && !scheduledTime) {
+      toast.error("Please select a date and time to schedule");
+      return;
+    }
+
     try {
       setSending(true);
-      await api.post("/sms/send/", {
+      
+      const payload = {
         p_id: customer.p_id,
         message: previewMessage,
-      });
-      setSuccessMessage(`SMS sent successfully to ${customer.cust_name}`);
-      toast.success("SMS sent");
+      };
+
+      // If scheduled, attach the time (converted to standard ISO format for Django)
+      if (isScheduled && scheduledTime) {
+        payload.scheduled_time = new Date(scheduledTime).toISOString();
+      }
+
+      await api.post("/sms/send/", payload);
+      
+      const msg = isScheduled 
+        ? `SMS scheduled successfully for ${customer.cust_name}` 
+        : `SMS sent successfully to ${customer.cust_name}`;
+
+      setSuccessMessage(msg);
+      toast.success(isScheduled ? "SMS scheduled" : "SMS sent");
+      
+      // Reset forms
       setPId("");
       setCustomer(null);
       setSelectedTemplate("");
       setPreviewMessage("");
+      setScheduledTime(""); // Reset schedule time
+      
       setTimeout(() => setSuccessMessage(""), 4000);
     } catch (error) {
-
       console.log(
         "SMS Send Error:",
         error.response?.data
       );
 
       const errorMsg =
-
         error.response?.data?.error ||
-
         "Failed to send SMS";
 
       setErrorMessage(errorMsg);
-
       toast.error(errorMsg);
     } finally {
       setSending(false);
@@ -172,7 +175,7 @@ export default function SmsSenderPage() {
           text-gray-500
           dark:text-[#9ca3af]
         "
-        >3
+        >
           Send SMS using templates
         </p>
       </div>
@@ -265,7 +268,6 @@ export default function SmsSenderPage() {
           "
           />
 
-
           <button
             onClick={findCustomer}
             disabled={loading}
@@ -290,20 +292,17 @@ export default function SmsSenderPage() {
             {loading ? "Searching..." : "Search"}
           </button>
         </div>
-        {
-          errorMessage && (
-
-            <p
-              className="
-      mt-3
-      text-sm
-      text-red-500
-    "
-            >
-              {errorMessage}
-            </p>
-          )
-        }
+        {errorMessage && (
+          <p
+            className="
+            mt-3
+            text-sm
+            text-red-500
+          "
+          >
+            {errorMessage}
+          </p>
+        )}
       </div>
 
       {/* Customer Details */}
@@ -377,64 +376,49 @@ export default function SmsSenderPage() {
             </div>
 
             <div className="col-span-2">
-
               <p
                 className="
-      text-xs
-      mb-2
+                text-xs
+                mb-2
 
-      text-gray-400
-      dark:text-[#6b7280]
-    "
+                text-gray-400
+                dark:text-[#6b7280]
+              "
               >
                 Extra Details
               </p>
 
               <div
                 className="
-      flex
-      flex-wrap
-      gap-2
-    "
+                flex
+                flex-wrap
+                gap-2
+              "
               >
-
                 {customer.extra_fields &&
-
-                  Object.entries(
-                    customer.extra_fields
-                  ).map(
-
+                  Object.entries(customer.extra_fields).map(
                     ([key, value]) => (
-
                       <div
                         key={key}
-
                         className="
-              px-3 py-1
+                        px-3 py-1
 
-              rounded-lg
+                        rounded-lg
 
-              bg-gray-100
-              dark:bg-[#151515]
+                        bg-gray-100
+                        dark:bg-[#151515]
 
-              text-sm
+                        text-sm
 
-              text-gray-700
-              dark:text-[#d1d5db]
-            "
+                        text-gray-700
+                        dark:text-[#d1d5db]
+                      "
                       >
-                        <strong>
-                          {key}
-                        </strong>
-
-                        : {String(value)}
+                        <strong>{key}</strong>: {String(value)}
                       </div>
                     )
-                  )
-                }
-
+                  )}
               </div>
-
             </div>
           </div>
         </div>
@@ -531,107 +515,166 @@ export default function SmsSenderPage() {
         </div>
       )}
 
-      {/* Preview */}
+      {/* Preview and Send/Schedule Block */}
       {previewMessage && (
-
         <div
           className="
-      bg-white
-      dark:bg-[#181818]
+          bg-white
+          dark:bg-[#181818]
 
-      border
-      border-gray-200
-      dark:border-[#2a2a2a]
+          border
+          border-gray-200
+          dark:border-[#2a2a2a]
 
-      rounded-xl
+          rounded-xl
 
-      p-5
+          p-5
 
-      transition-colors
-      duration-300
-    "
+          transition-colors
+          duration-300
+        "
         >
-
           <h2
             className="
-        text-sm
-        font-medium
-        mb-3
+            text-sm
+            font-medium
+            mb-3
 
-        text-gray-700
-        dark:text-[#e5e5e5]
-      "
+            text-gray-700
+            dark:text-[#e5e5e5]
+          "
           >
             SMS preview
           </h2>
 
-
-
           <div
             className="
-        mb-4
+            mb-6
 
-        px-4 py-3
+            px-4 py-3
 
-        rounded-lg
+            rounded-lg
 
-        border
+            border
 
-        border-gray-200
-        dark:border-[#2a2a2a]
+            border-gray-200
+            dark:border-[#2a2a2a]
 
-        bg-gray-100
-        dark:bg-[#151515]
+            bg-gray-100
+            dark:bg-[#151515]
 
-        transition-colors
-      "
+            transition-colors
+          "
           >
-
             <p
               className="
-          text-sm
-          leading-relaxed
-          whitespace-pre-wrap
+              text-sm
+              leading-relaxed
+              whitespace-pre-wrap
 
-          text-gray-700
-          dark:text-[#d1d5db]
-        "
+              text-gray-700
+              dark:text-[#d1d5db]
+            "
             >
               {previewMessage}
             </p>
-
           </div>
 
+          {/* ACTION BUTTONS: SEND IMMEDIATELY OR SCHEDULE */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            
+            {/* Send Immediately Button */}
+            <button
+              onClick={() => sendSMS(false)}
+              disabled={sending}
+              className="
+              px-5 py-2
+              rounded-lg
+              whitespace-nowrap
 
+              bg-gray-900
+              dark:bg-[#222222]
 
-          <button
-            onClick={sendSMS}
+              text-white
+              dark:text-[#e5e5e5]
 
-            disabled={sending}
+              hover:bg-black
+              dark:hover:bg-[#2a2a2a]
 
-            className="
-        px-5 py-2
-        rounded-lg
+              disabled:opacity-50
 
-        bg-gray-900
-        dark:bg-[#222222]
+              transition-colors
+            "
+            >
+              {sending ? "Sending..." : "Send Immediately"}
+            </button>
 
-        text-white
-        dark:text-[#e5e5e5]
+            {/* Divider */}
+            <div className="hidden sm:block w-px h-8 bg-gray-200 dark:bg-[#2a2a2a]"></div>
+            <div className="block sm:hidden h-px w-full bg-gray-200 dark:bg-[#2a2a2a]"></div>
 
-        hover:bg-black
-        dark:hover:bg-[#2a2a2a]
+            {/* Schedule Inputs */}
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <input
+                type="datetime-local"
+                value={scheduledTime}
+                onChange={(e) => setScheduledTime(e.target.value)}
+                className="
+                flex-1
+                px-4 py-2
+                rounded-lg
+                outline-none
+                text-sm
 
-        disabled:opacity-50
+                border
+                border-gray-200
+                dark:border-[#2a2a2a]
 
-        transition-colors
-      "
-          >
-            {sending
-              ? "Sending..."
-              : "Send SMS"}
-          </button>
+                bg-white
+                dark:bg-[#151515]
 
+                text-gray-800
+                dark:text-[#e5e5e5]
+
+                focus:border-gray-400
+                dark:focus:border-[#3a3a3a]
+
+                transition-colors
+              "
+              />
+
+              <button
+                onClick={() => sendSMS(true)}
+                disabled={sending || !scheduledTime}
+                className="
+                px-5 py-2
+                rounded-lg
+                text-sm
+                whitespace-nowrap
+
+                border
+                border-gray-300
+                dark:border-[#2a2a2a]
+
+                bg-white
+                dark:bg-[#181818]
+
+                text-gray-700
+                dark:text-[#e5e5e5]
+
+                hover:bg-gray-100
+                dark:hover:bg-[#1c1c1c]
+
+                disabled:opacity-50
+
+                transition-colors
+              "
+              >
+                {sending ? "Scheduling..." : "Schedule SMS"}
+              </button>
+            </div>
+
+          </div>
         </div>
       )}
     </div>

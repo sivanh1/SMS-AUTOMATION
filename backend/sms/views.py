@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from django.utils.dateparse import parse_datetime
+
 from rest_framework.decorators import (
     api_view,
     permission_classes,
@@ -30,6 +32,18 @@ def send_sms(request):
     p_id = request.data.get("p_id")
 
     message = request.data.get("message")
+
+    scheduled_time_str = request.data.get("scheduled_time")
+
+    scheduled_datetime = None
+
+    current_status = 'logged'
+
+    if scheduled_time_str:
+
+        scheduled_datetime = parse_datetime(scheduled_time_str)
+
+        current_status = 'pending'
 
     # VALIDATE INPUTS
     if not p_id or not message:
@@ -100,7 +114,9 @@ def send_sms(request):
 
     message=message,
 
-    status='logged'
+    status=current_status,
+
+    scheduled_time=scheduled_datetime
 )
 
         # CONSOLE LOG
@@ -118,7 +134,7 @@ def send_sms(request):
 
             f'"message":"{message}", '
 
-            f'"status":"logged"'
+            f'"status":"{current_status}"'
 
             f'}}'
         )
@@ -126,7 +142,7 @@ def send_sms(request):
         return Response({
 
             "message":
-            "SMS logged successfully",
+            "SMS scheduled successfully" if current_status == 'pending' else "SMS logged successfully",
 
             "status":
             sms_log.status
@@ -273,6 +289,18 @@ def send_bulk_sms(request):
         []
     )
 
+    scheduled_time_str = request.data.get("scheduled_time")
+
+    scheduled_datetime = None
+
+    target_status = 'logged'
+
+    if scheduled_time_str:
+
+        scheduled_datetime = parse_datetime(scheduled_time_str)
+
+        target_status = 'pending'
+
     if not customers:
 
         return Response({
@@ -331,7 +359,9 @@ def send_bulk_sms(request):
 
     message=item["message"],
 
-    status='failed'
+    status='failed',
+
+    scheduled_time=scheduled_datetime
 )
 
                 failed.append({
@@ -383,7 +413,9 @@ def send_bulk_sms(request):
 
     message=item["message"],
 
-    status='logged'
+    status=target_status,
+
+    scheduled_time=scheduled_datetime
 )
 
             print(
@@ -400,7 +432,7 @@ def send_bulk_sms(request):
 
                 f'"message":"{item["message"]}", '
 
-                f'"status":"logged"'
+                f'"status":"{target_status}"'
 
                 f'}}'
             )
@@ -421,7 +453,7 @@ def send_bulk_sms(request):
     return Response({
 
         "message":
-        "Bulk SMS completed",
+        "Bulk SMS scheduled" if target_status == 'pending' else "Bulk SMS completed",
 
         "sent_count":
         sent_count,

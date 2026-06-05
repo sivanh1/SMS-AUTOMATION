@@ -14,6 +14,10 @@ export default function LogsPage() {
   const [currentPage, setCurrentPage] =
     useState(1);
 
+  // NEW: Filter State
+  const [statusFilter, setStatusFilter] =
+    useState("All");
+
   const logsPerPage = 5;
 
   const fetchLogs = async () => {
@@ -42,21 +46,60 @@ export default function LogsPage() {
 
   }, []);
 
+  // NEW: Helper to dynamically compute status based on scheduled time
+  const getDisplayStatus = (log) => {
+
+    if (log.status === "failed") return "Failed";
+
+    if (log.status === "pending" || log.scheduled_time) {
+
+      const now = new Date();
+
+      const scheduled = new Date(log.scheduled_time);
+
+      if (scheduled > now) {
+
+        return "Scheduled";
+
+      } else {
+
+        return "Logged";
+
+      }
+
+    }
+
+    return log.status ? log.status.charAt(0).toUpperCase() + log.status.slice(1) : "Logged";
+
+  };
+
+  // NEW: Filter the logs array before pagination
+  const filteredLogs = logs.filter((log) => {
+
+    if (statusFilter === "All") return true;
+
+    return getDisplayStatus(log).toLowerCase() === statusFilter.toLowerCase();
+
+  });
+
   const indexOfLastLog =
     currentPage * logsPerPage;
 
   const indexOfFirstLog =
     indexOfLastLog - logsPerPage;
 
+  // CHANGED: Slice from filteredLogs instead of logs
   const currentLogs =
-    logs.slice(
+    filteredLogs.slice(
       indexOfFirstLog,
       indexOfLastLog
     );
 
+  // CHANGED: Calculate total pages from filteredLogs
   const totalPages = Math.ceil(
-    logs.length / logsPerPage
+    filteredLogs.length / logsPerPage
   );
+
   const MessageCell = ({ message }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
@@ -97,31 +140,80 @@ export default function LogsPage() {
     >
 
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
 
-        <h1
-          className="
-        text-3xl
-        font-semibold
+        <div>
 
-        text-gray-800
-        dark:text-[#e5e5e5]
-      "
-        >
-          SMS Logs
-        </h1>
+          <h1
+            className="
+          text-3xl
+          font-semibold
 
-        <p
-          className="
-        text-sm
-        mt-1
+          text-gray-800
+          dark:text-[#e5e5e5]
+        "
+          >
+            SMS Logs
+          </h1>
 
-        text-gray-500
-        dark:text-[#9ca3af]
-      "
-        >
-          View all sent SMS history
-        </p>
+          <p
+            className="
+          text-sm
+          mt-1
+
+          text-gray-500
+          dark:text-[#9ca3af]
+        "
+          >
+            View all sent SMS history
+          </p>
+
+        </div>
+
+        {/* NEW: Filter Dropdown */}
+        <div>
+
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="
+              px-4 py-2
+
+              rounded-lg
+              outline-none
+
+              border
+              border-gray-200
+              dark:border-[#2a2a2a]
+
+              bg-white
+              dark:bg-[#151515]
+
+              text-sm
+              text-gray-800
+              dark:text-[#e5e5e5]
+
+              focus:border-gray-400
+              dark:focus:border-[#3a3a3a]
+
+              transition-colors
+            "
+          >
+
+            <option value="All">All Statuses</option>
+
+            <option value="Logged">Logged</option>
+
+            <option value="Failed">Failed</option>
+
+            <option value="Scheduled">Scheduled</option>
+
+          </select>
+
+        </div>
 
       </div>
 
@@ -220,7 +312,7 @@ export default function LogsPage() {
 
                 </tr>
 
-              ) : logs.length === 0 ? (
+              ) : filteredLogs.length === 0 ? (
 
                 <tr>
 
@@ -313,37 +405,62 @@ export default function LogsPage() {
 
                     <td className="px-6 py-4">
 
-                      <span
-  className={`
-    text-xs
+                      <div className="flex flex-col items-start gap-1">
+                        <span
+    className={`
+      text-xs
 
-    px-3 py-1
+      px-3 py-1
 
-    rounded-full
+      rounded-full
 
-    ${
-      log.status === "failed"
+      w-fit
 
-        ? `
-          bg-red-100
-          dark:bg-red-950/30
+      ${
+        getDisplayStatus(log) === "Failed"
 
-          text-red-600
-          dark:text-red-400
-        `
+          ? `
+            bg-red-100
+            dark:bg-red-950/30
 
-        : `
-          bg-green-100
-          dark:bg-green-950/30
+            text-red-600
+            dark:text-red-400
+          `
 
-          text-green-700
-          dark:text-green-400
-        `
-    }
-  `}
->
-  {log.status}
-</span>
+          : getDisplayStatus(log) === "Scheduled"
+
+          ? `
+            bg-blue-100
+            dark:bg-blue-950/30
+
+            text-blue-600
+            dark:text-blue-400
+          `
+
+          : `
+            bg-green-100
+            dark:bg-green-950/30
+
+            text-green-700
+            dark:text-green-400
+          `
+      }
+    `}
+  >
+    {getDisplayStatus(log)}
+  </span>
+  
+                        {getDisplayStatus(log) === "Scheduled" && log.scheduled_time && (
+                          <span className="text-[11px] text-gray-500 dark:text-[#9ca3af] mt-1 whitespace-nowrap">
+                            {new Date(log.scheduled_time).toLocaleString([], {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit"
+                            })}
+                          </span>
+                        )}
+                      </div>
 
                     </td>
 

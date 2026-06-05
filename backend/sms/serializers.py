@@ -31,7 +31,9 @@ class SMSLogSerializer(
 
             'status',
 
-            'created_at'
+            'created_at',
+            
+            'scheduled_time'
         ]
 
     def get_sent_by(self, obj):
