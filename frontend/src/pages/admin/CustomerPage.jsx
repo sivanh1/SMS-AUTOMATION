@@ -175,7 +175,7 @@ export default function CustomersPage() {
           <div className="flex-1 relative">
             <input
               type="text"
-              placeholder="Search customer by ID, Name, or Mobile..."
+              placeholder="Search customer by ID, Name"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={handleKeyDown}
