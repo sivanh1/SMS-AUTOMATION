@@ -276,7 +276,7 @@ export default function CustomersPage() {
                     className="hover:bg-gray-50/50 dark:hover:bg-[#1a1a1a] transition-colors duration-200 group"
                   >
                     <td className="px-6 py-4 text-sm font-medium text-gray-600 dark:text-gray-400 truncate">
-                      #{customer.p_id}
+                      {customer.p_id}
                     </td>
 
                     <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white truncate" title={customer.cust_name}>

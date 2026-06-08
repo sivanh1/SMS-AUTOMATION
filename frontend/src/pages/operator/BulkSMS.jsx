@@ -17,6 +17,10 @@ export default function BulkSMS() {
   const [scheduledTime, setScheduledTime] = 
     useState("");
 
+  // NEW STATE TO HOLD CUSTOMER DATA FOR RECOMMENDATIONS
+  const [allCustomersData, setAllCustomersData] = 
+    useState([]);
+
   const [loading, setLoading] =
     useState(false);
 
@@ -34,19 +38,23 @@ export default function BulkSMS() {
 
 
 
-  const fetchTemplates = async () => {
+  // MODIFIED: Fetch templates AND customers so we know what columns exist
+  const fetchTemplatesAndCustomers = async () => {
 
     try {
 
-      const response =
-        await api.get("/templates/");
+      const [templatesRes, customersRes] = await Promise.all([
+        api.get("/templates/"),
+        api.get("/customers/listcustomers/")
+      ]);
 
-      setTemplates(response.data);
+      setTemplates(templatesRes.data);
+      setAllCustomersData(customersRes.data);
 
     } catch (error) {
 
       console.log(
-        "Template Error:",
+        "Fetch Error:",
         error.response?.data
       );
 
@@ -56,7 +64,7 @@ export default function BulkSMS() {
 
         error.response?.data?.detail ||
 
-        "Failed to load templates"
+        "Failed to load required data"
       );
     }
   };
@@ -226,9 +234,38 @@ export default function BulkSMS() {
 
   useEffect(() => {
 
-    fetchTemplates();
+    fetchTemplatesAndCustomers();
 
   }, []);
+
+
+
+  // NEW: Recommendation logic based on customer data structure
+  const getRecommendedTemplates = () => {
+    if (allCustomersData.length === 0 || templates.length === 0) return [];
+
+    // Analyze the first customer to get the available columns/fields
+    const sampleCustomer = allCustomersData[0];
+    
+    const availableKeys = [
+      "cust_name", 
+      "mobile_number", 
+      ...Object.keys(sampleCustomer.extra_fields || {})
+    ];
+
+    return templates.filter((template) => {
+      // Find all $placeholders in template body
+      const matches = template.body.match(/\$[a-zA-Z0-9_]+/g) || [];
+      const requiredPlaceholders = matches.map(match => match.slice(1));
+
+      if (requiredPlaceholders.length === 0) return false;
+
+      // Only recommend if all template placeholders exist in the dataset
+      return requiredPlaceholders.every(placeholder => availableKeys.includes(placeholder));
+    });
+  };
+
+  const recommendedTemplates = getRecommendedTemplates();
 
 
 
@@ -359,18 +396,53 @@ export default function BulkSMS() {
         "
       >
 
-        <h2
-          className="
-            text-sm
-            font-medium
-            mb-3
+        <div className="flex justify-between items-end mb-4">
 
-            text-gray-700
-            dark:text-[#e5e5e5]
-          "
-        >
-          Select template
-        </h2>
+          <h2
+            className="
+              text-sm
+              font-medium
+
+              text-gray-700
+              dark:text-[#e5e5e5]
+            "
+          >
+            Select template
+          </h2>
+
+        </div>
+
+
+        {/* NEW: Recommended Templates UI */}
+        {recommendedTemplates.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs text-gray-500 dark:text-[#9ca3af] mb-2">
+              ✨ Recommended based on your customer database structure:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {recommendedTemplates.map((template) => (
+                <button
+                  key={`rec-${template.id}`}
+                  onClick={() => setSelectedTemplate(template.body)}
+                  className={`
+                    px-3 py-1.5 
+                    text-xs font-medium 
+                    rounded-full 
+                    border 
+                    transition-colors
+                    ${
+                      selectedTemplate === template.body
+                        ? "bg-indigo-100 border-indigo-300 text-indigo-700 dark:bg-indigo-900/30 dark:border-indigo-700/50 dark:text-indigo-400"
+                        : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 dark:bg-[#151515] dark:border-[#2a2a2a] dark:text-[#9ca3af] dark:hover:bg-[#1c1c1c]"
+                    }
+                  `}
+                >
+                  {template.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
 
 

@@ -10,6 +10,8 @@ import MainLayout from "../layouts/MainLayout";
 
 import ProtectedRoute from "./ProtectedRoute";
 
+import QueryPage from "../pages/QueryPage";
+
 import DashboardPage from "../pages/admin/DashboardPage";
 
 import CustomersPage from "../pages/admin/CustomerPage";
@@ -79,6 +81,7 @@ export default function AppRoutes() {
             path="addusers"
             element={<Users/>}
           />
+          <Route path="queries" element={<QueryPage isAdmin={true} />} />
 
         </Route>
         
@@ -112,6 +115,7 @@ export default function AppRoutes() {
             path="bulksms"
             element={<BulkSMS />}
           />
+          <Route path="queries" element={<QueryPage isAdmin={false} />} />
 
         </Route>
 

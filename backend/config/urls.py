@@ -8,5 +8,7 @@ urlpatterns = [
     path('api/users/', include('users.urls')),
     path('api/templates/',include('templates_app.urls')),
     path('api/sms/',include('sms.urls')),
+    path('api/query/',include('query.urls')
+),
     
 ]

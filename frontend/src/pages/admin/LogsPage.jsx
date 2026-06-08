@@ -250,14 +250,7 @@ export default function LogsPage() {
           "
             >
 
-              <tr
-                className="
-              text-sm
-
-              text-gray-600
-              dark:text-[#9ca3af]
-            "
-              >
+              <tr className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
 
                 <th className="text-left px-6 py-4 font-medium">
                   P_ID

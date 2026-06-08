@@ -95,6 +95,21 @@ export default function DashboardPage() {
     fetchDashboard();
   }, []);
 
+  // NEW: Helper to dynamically compute status based on scheduled time
+  const getDisplayStatus = (log) => {
+    if (log.status === "failed") return "Failed";
+    if (log.status === "pending" || log.scheduled_time) {
+      const now = new Date();
+      const scheduled = new Date(log.scheduled_time);
+      if (scheduled > now) {
+        return "Scheduled";
+      } else {
+        return "Logged";
+      }
+    }
+    return log.status ? log.status.charAt(0).toUpperCase() + log.status.slice(1) : "Logged";
+  };
+
   return (
     <div className="min-h-screen bg-gray-50/50 dark:bg-[#0f0f0f] p-6 lg:p-8 xl:p-10 transition-colors duration-300 font-sans">
       
@@ -265,24 +280,39 @@ export default function DashboardPage() {
 
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                       <div className="flex items-center gap-2">
-                        
                         {log.sent_by?.username || "System"}
                       </div>
                     </td>
 
                     <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
-                          log.status === "failed"
-                            ? "bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/20"
-                            : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20"
-                        }`}
-                      >
-                        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                          log.status === "failed" ? "bg-rose-500" : "bg-emerald-500"
-                        }`}></span>
-                        {log.status.charAt(0).toUpperCase() + log.status.slice(1)}
-                      </span>
+                      <div className="flex flex-col items-start gap-1">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border w-fit ${
+                            getDisplayStatus(log) === "Failed"
+                              ? "bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/20"
+                              : getDisplayStatus(log) === "Scheduled"
+                              ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/30"
+                              : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20"
+                          }`}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                            getDisplayStatus(log) === "Failed" ? "bg-rose-500" : 
+                            getDisplayStatus(log) === "Scheduled" ? "bg-blue-500" : "bg-emerald-500"
+                          }`}></span>
+                          {getDisplayStatus(log)}
+                        </span>
+                        
+                        {getDisplayStatus(log) === "Scheduled" && log.scheduled_time && (
+                          <span className="text-[11px] text-gray-500 dark:text-[#9ca3af] mt-1 whitespace-nowrap font-medium">
+                            {new Date(log.scheduled_time).toLocaleString([], {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit"
+                            })}
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">

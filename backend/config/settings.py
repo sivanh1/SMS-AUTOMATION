@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'users',
     'templates_app',
     'sms',
+    'query',
 ]
 
 

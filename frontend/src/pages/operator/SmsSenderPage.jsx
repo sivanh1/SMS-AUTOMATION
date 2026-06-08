@@ -8,7 +8,7 @@ export default function SmsSenderPage() {
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [previewMessage, setPreviewMessage] = useState("");
-  const [scheduledTime, setScheduledTime] = useState(""); // NEW STATE FOR SCHEDULING
+  const [scheduledTime, setScheduledTime] = useState(""); 
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -73,7 +73,6 @@ export default function SmsSenderPage() {
     }
   };
 
-  // MODIFIED TO HANDLE SCHEDULING
   const sendSMS = async (isScheduled = false) => {
     if (!previewMessage) {
       toast.error("Generate preview first");
@@ -93,7 +92,6 @@ export default function SmsSenderPage() {
         message: previewMessage,
       };
 
-      // If scheduled, attach the time (converted to standard ISO format for Django)
       if (isScheduled && scheduledTime) {
         payload.scheduled_time = new Date(scheduledTime).toISOString();
       }
@@ -107,12 +105,11 @@ export default function SmsSenderPage() {
       setSuccessMessage(msg);
       toast.success(isScheduled ? "SMS scheduled" : "SMS sent");
       
-      // Reset forms
       setPId("");
       setCustomer(null);
       setSelectedTemplate("");
       setPreviewMessage("");
-      setScheduledTime(""); // Reset schedule time
+      setScheduledTime(""); 
       
       setTimeout(() => setSuccessMessage(""), 4000);
     } catch (error) {
@@ -139,6 +136,34 @@ export default function SmsSenderPage() {
   useEffect(() => {
     fetchTemplates();
   }, []);
+
+  // NEW: Helper function to determine recommended templates based on customer data
+  const getRecommendedTemplates = () => {
+    if (!customer || templates.length === 0) return [];
+
+    // Combine standard fields and dynamic extra_fields into one array of available keys
+    const availableKeys = [
+      "cust_name", 
+      "mobile_number", 
+      ...Object.keys(customer.extra_fields || {})
+    ];
+
+    return templates.filter((template) => {
+      // Find all placeholders like $amount, $due_date in the template body
+      const matches = template.body.match(/\$[a-zA-Z0-9_]+/g) || [];
+      
+      // Remove the '$' symbol to get the raw key
+      const requiredPlaceholders = matches.map(match => match.slice(1));
+
+      // If template has no placeholders, we don't strictly "recommend" it as a dynamic match
+      if (requiredPlaceholders.length === 0) return false;
+
+      // Recommend ONLY if every placeholder in the template exists in the customer's data
+      return requiredPlaceholders.every(placeholder => availableKeys.includes(placeholder));
+    });
+  };
+
+  const recommendedTemplates = getRecommendedTemplates();
 
   return (
     <div
@@ -444,18 +469,50 @@ export default function SmsSenderPage() {
           duration-300
         "
         >
-          <h2
-            className="
-            text-sm
-            font-medium
-            mb-3
+          <div className="flex justify-between items-end mb-4">
+            <h2
+              className="
+              text-sm
+              font-medium
 
-            text-gray-700
-            dark:text-[#e5e5e5]
-          "
-          >
-            Select template
-          </h2>
+              text-gray-700
+              dark:text-[#e5e5e5]
+            "
+            >
+              Select template
+            </h2>
+          </div>
+
+          {/* NEW: Recommended Templates Section */}
+          {recommendedTemplates.length > 0 && (
+            <div className="mb-4">
+              <p className="text-xs text-gray-500 dark:text-[#9ca3af] mb-2">
+                ✨ Recommended based on customer data:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {recommendedTemplates.map((template) => (
+                  <button
+                    key={`rec-${template.id}`}
+                    onClick={() => setSelectedTemplate(template.body)}
+                    className={`
+                      px-3 py-1.5 
+                      text-xs font-medium 
+                      rounded-full 
+                      border 
+                      transition-colors
+                      ${
+                        selectedTemplate === template.body
+                          ? "bg-indigo-100 border-indigo-300 text-indigo-700 dark:bg-indigo-900/30 dark:border-indigo-700/50 dark:text-indigo-400"
+                          : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 dark:bg-[#151515] dark:border-[#2a2a2a] dark:text-[#9ca3af] dark:hover:bg-[#1c1c1c]"
+                      }
+                    `}
+                  >
+                    {template.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <select
             value={selectedTemplate}

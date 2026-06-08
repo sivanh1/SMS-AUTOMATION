@@ -11,7 +11,6 @@ from services.template_engine import (
 )
 from rest_framework.permissions import (
     IsAuthenticated,
-    AllowAny,
 )
 
 from rest_framework.response import Response
@@ -26,7 +25,7 @@ from .serializers import SMSLogSerializer
 # SEND SMS
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def send_sms(request):
 
     p_id = request.data.get("p_id")
@@ -172,7 +171,7 @@ def send_sms(request):
 # SMS LOGS
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 
 def sms_logs(request):
 
@@ -192,7 +191,7 @@ def sms_logs(request):
 # BULK SMS PREVIEW
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def preview_bulk_sms(request):
 
     template = request.data.get(
@@ -281,7 +280,7 @@ def preview_bulk_sms(request):
 # SEND BULK SMS
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def send_bulk_sms(request):
 
     customers = request.data.get(
