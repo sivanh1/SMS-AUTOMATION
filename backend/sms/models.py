@@ -2,14 +2,12 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class SMSLog(models.Model):
-    # Added 'pending' for messages waiting for their scheduled time
     STATUS_CHOICES = (
         ('pending', 'Pending'),
         ('logged', 'Logged'),
         ('failed', 'Failed'),
     )
 
-    
     p_id = models.CharField(max_length=100)
     cust_name = models.CharField(max_length=255)
     mobile_number = models.CharField(max_length=20)
@@ -22,7 +20,6 @@ class SMSLog(models.Model):
         default='pending'  
     )
 
-  
     sent_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -31,12 +28,10 @@ class SMSLog(models.Model):
     )
     
     created_at = models.DateTimeField(auto_now_add=True)
-    
     scheduled_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"[{self.status.upper()}] {self.cust_name} - {self.mobile_number}"
         
     class Meta:
-        
         ordering = ['-created_at']

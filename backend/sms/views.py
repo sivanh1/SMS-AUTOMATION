@@ -10,7 +10,7 @@ from services.template_engine import (
     generate_sms_preview
 )
 from rest_framework.permissions import (
-    IsAuthenticated,
+    IsAuthenticated,AllowAny
 )
 
 from rest_framework.response import Response
@@ -20,6 +20,8 @@ from customers.models import Customer
 from .models import SMSLog
 
 from .serializers import SMSLogSerializer
+
+from .tasks import send_single_sms, send_bulk_sms as trigger_bulk_sms
 
 
 # SEND SMS
@@ -36,7 +38,7 @@ def send_sms(request):
 
     scheduled_datetime = None
 
-    current_status = 'logged'
+    current_status = 'pending'
 
     if scheduled_time_str:
 
@@ -118,6 +120,11 @@ def send_sms(request):
     scheduled_time=scheduled_datetime
 )
 
+        if scheduled_datetime:
+            send_single_sms.apply_async(args=[sms_log.id], eta=scheduled_datetime)
+        else:
+            send_single_sms.delay(sms_log.id)
+
         # CONSOLE LOG
         print(
 
@@ -171,7 +178,7 @@ def send_sms(request):
 # SMS LOGS
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 
 def sms_logs(request):
 
@@ -185,8 +192,6 @@ def sms_logs(request):
     )
 
     return Response(serializer.data)
-
-# BULK SMS PREVIEW
 
 # BULK SMS PREVIEW
 
@@ -292,7 +297,7 @@ def send_bulk_sms(request):
 
     scheduled_datetime = None
 
-    target_status = 'logged'
+    target_status = 'pending'
 
     if scheduled_time_str:
 
@@ -312,6 +317,8 @@ def send_bulk_sms(request):
     sent_count = 0
 
     failed = []
+
+    log_ids = []
 
     for item in customers:
 
@@ -438,6 +445,8 @@ def send_bulk_sms(request):
 
             sent_count += 1
 
+            log_ids.append(sms_log.id)
+
         except Exception as error:
 
             failed.append({
@@ -448,6 +457,13 @@ def send_bulk_sms(request):
                 "error":
                 str(error)
             })
+
+    if log_ids:
+        if scheduled_datetime:
+            for log_id in log_ids:
+                send_single_sms.apply_async(args=[log_id], eta=scheduled_datetime)
+        else:
+            trigger_bulk_sms.delay(log_ids)
 
     return Response({
 

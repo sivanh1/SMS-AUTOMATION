@@ -7,6 +7,11 @@ SMS Automation System Backend Configuration
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+from datetime import timedelta
+
+load_dotenv()
 
 
 # Base Directory
@@ -35,6 +40,7 @@ INSTALLED_APPS = [
     # Third Party Apps
     'rest_framework',
     'corsheaders',
+    'django_celery_beat',
 
     # Project Apps
     'customers',
@@ -136,8 +142,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # CORS CONFIGURATION
-# CORS CONFIGURATION
-
 CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True
@@ -151,42 +155,44 @@ CORS_ALLOW_METHODS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-
     "https://*.ngrok-free.dev",
-
 ]
 
+
 # DJANGO REST FRAMEWORK CONFIGURATION
-# REST_FRAMEWORK = {}
-
 REST_FRAMEWORK = {
-
     'DEFAULT_AUTHENTICATION_CLASSES': [
-
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-
     'DEFAULT_PERMISSION_CLASSES': [
-
         'rest_framework.permissions.IsAuthenticated',
     ]
 }
-from datetime import timedelta
 
 
 SIMPLE_JWT = {
-
-    'ACCESS_TOKEN_LIFETIME': timedelta(
-        days=1
-    ),
-
-    'REFRESH_TOKEN_LIFETIME': timedelta(
-        days=30
-    ),
-
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'ROTATE_REFRESH_TOKENS': False,
-
     'BLACKLIST_AFTER_ROTATION': False,
-
     'UPDATE_LAST_LOGIN': True,
 }
+
+
+# CELERY CONFIGURATION
+CELERY_BROKER_URL          = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND      = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT      = ['json']
+CELERY_TASK_SERIALIZER     = 'json'
+CELERY_RESULT_SERIALIZER   = 'json'
+CELERY_TIMEZONE            = 'UTC'
+
+
+# TWILIO GATEWAY CONFIGURATION (Safely loaded from your .env file)
+TWILIO_ACCOUNT_SID  = os.getenv('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN   = os.getenv('TWILIO_AUTH_TOKEN')
+TWILIO_PHONE        = os.getenv('TWILIO_PHONE_NUMBER')
+
+
+# REGIONAL SMS CARRIER CONFIGURATION
+SMS_DEFAULT_COUNTRY_CODE = '+91'
