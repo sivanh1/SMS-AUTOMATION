@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { Eye, EyeOff } from "lucide-react"; // Imported eye icons
 import api from "../../services/api";
 import login from "../../assets/login.png";
 
@@ -9,6 +10,7 @@ export default function LoginPage() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // New state for tracking password visibility
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -265,40 +267,73 @@ export default function LoginPage() {
                 Password
               </label>
 
-              <input
-                type="password"
-                placeholder="Enter password"
-                value={password}
-                onChange={(e) =>
-                  setPassword(e.target.value)
-                }
-                className="
-                  w-full
+              {/* Relative wrapper container for positioning the eye icon */}
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"} // Dynamic input type change
+                  placeholder="Enter password"
+                  value={password}
+                  onChange={(e) =>
+                    setPassword(e.target.value)
+                  }
+                  className="
+                    w-full
 
-                  px-4 py-2.5
+                    pl-4 pr-11 py-2.5
 
-                  rounded-lg
-                  outline-none
+                    rounded-lg
+                    outline-none
 
-                  border
-                  border-gray-300
-                  dark:border-[#2a2a2a]
+                    border
+                    border-gray-300
+                    dark:border-[#2a2a2a]
 
-                  bg-white
-                  dark:bg-[#151515]
+                    bg-white
+                    dark:bg-[#151515]
 
-                  text-gray-900
-                  dark:text-[#e5e5e5]
+                    text-gray-900
+                    dark:text-[#e5e5e5]
 
-                  placeholder:text-gray-400
-                  dark:placeholder:text-[#6b7280]
+                    placeholder:text-gray-400
+                    dark:placeholder:text-[#6b7280]
 
-                  focus:border-gray-400
-                  dark:focus:border-[#3a3a3a]
+                    focus:border-gray-400
+                    dark:focus:border-[#3a3a3a]
 
-                  transition-colors
-                "
-              />
+                    transition-colors
+                  "
+                />
+
+                {/* Eye toggle button */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="
+                    absolute
+                    right-3
+                    top-1/2
+                    -translate-y-1/2
+                    
+                    p-1
+                    rounded-md
+
+                    text-gray-400
+                    dark:text-[#6b7280]
+                    
+                    hover:text-gray-600
+                    dark:hover:text-[#9ca3af]
+                    
+                    focus:outline-none
+                    transition-colors
+                  "
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
 
               {errorMessage && (
 
