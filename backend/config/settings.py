@@ -122,16 +122,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # INTERNATIONALIZATION
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
 USE_TZ = True
-
 
 # STATIC FILES
 STATIC_URL = 'static/'
@@ -180,13 +178,15 @@ SIMPLE_JWT = {
 
 
 # CELERY CONFIGURATION
-CELERY_BROKER_URL          = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND      = 'redis://localhost:6379/0'
-CELERY_ACCEPT_CONTENT      = ['json']
-CELERY_TASK_SERIALIZER     = 'json'
-CELERY_RESULT_SERIALIZER   = 'json'
-CELERY_TIMEZONE            = 'UTC'
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+CELERY_TIMEZONE = 'Asia/Kolkata'
+CELERY_ENABLE_UTC = False
 
 # TWILIO GATEWAY CONFIGURATION (Safely loaded from your .env file)
 TWILIO_ACCOUNT_SID  = os.getenv('TWILIO_ACCOUNT_SID')

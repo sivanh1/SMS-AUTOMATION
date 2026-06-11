@@ -217,6 +217,11 @@ export default function Sidebar() {
                 {isOpen && <span>Bulk SMS</span>}
                 <NavTooltip text="Bulk SMS" />
               </Link>
+              <Link to="/operator/operatorlogs" className={navClass(location.pathname.includes("/operatorlogs"))}>
+                <ClipboardList size={20} className="flex-shrink-0 group-hover:scale-110 transition-transform duration-200" />
+                {isOpen && <span>My Logs</span>}
+                <NavTooltip text="My Logs" />
+              </Link>
               <Link to="/operator/queries" className={navClass(location.pathname.includes("/queries"))}>
                 <MessageCircle size={20} className="flex-shrink-0 group-hover:scale-110 transition-transform duration-200" />
                 {isOpen && <span>My Queries</span>}

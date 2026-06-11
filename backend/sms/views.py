@@ -10,7 +10,7 @@ from services.template_engine import (
     generate_sms_preview
 )
 from rest_framework.permissions import (
-    IsAuthenticated,AllowAny
+    IsAuthenticated, AllowAny
 )
 
 from rest_framework.response import Response
@@ -100,25 +100,26 @@ def send_sms(request):
         # CREATE SMS LOG
         sms_log = SMSLog.objects.create(
 
-    p_id=customer.p_id,
+            p_id=customer.p_id,
 
-    cust_name=customer.cust_name,
+            cust_name=customer.cust_name,
 
-    mobile_number=mobile_number,
+            mobile_number=mobile_number,
 
-    extra_fields=
-    customer.extra_fields,
+            extra_fields=customer.extra_fields,
 
-    sent_by=request.user
-    if request.user.is_authenticated
-    else None,
+            sent_by=request.user
+            if request.user.is_authenticated
+            else None,
 
-    message=message,
+            message=message,
 
-    status=current_status,
+            status=current_status,
 
-    scheduled_time=scheduled_datetime
-)
+            scheduled_time=scheduled_datetime,
+
+            failure_reason=None,
+        )
 
         if scheduled_datetime:
             send_single_sms.apply_async(args=[sms_log.id], eta=scheduled_datetime)
@@ -174,7 +175,8 @@ def send_sms(request):
             str(error)
 
         }, status=500)
-    
+
+
 # SMS LOGS
 
 @api_view(['GET'])
@@ -192,6 +194,7 @@ def sms_logs(request):
     )
 
     return Response(serializer.data)
+
 
 # BULK SMS PREVIEW
 
@@ -281,7 +284,8 @@ def preview_bulk_sms(request):
             str(error)
 
         }, status=500)
-    
+
+
 # SEND BULK SMS
 
 @api_view(['POST'])
@@ -349,26 +353,29 @@ def send_bulk_sms(request):
 
                 SMSLog.objects.create(
 
-    p_id=customer.p_id,
+                    p_id=customer.p_id,
 
-    cust_name=customer.cust_name,
+                    cust_name=customer.cust_name,
 
-    mobile_number=mobile_number,
+                    mobile_number=mobile_number,
 
-    extra_fields=dict(
-        customer.extra_fields
-    ),
+                    extra_fields=dict(
+                        customer.extra_fields
+                    ),
 
-    sent_by=request.user
-    if request.user.is_authenticated
-    else None,
+                    sent_by=request.user
+                    if request.user.is_authenticated
+                    else None,
 
-    message=item["message"],
+                    message=item["message"],
 
-    status='failed',
+                    status='failed',
 
-    scheduled_time=scheduled_datetime
-)
+                    scheduled_time=scheduled_datetime,
+
+                    # ── REASON: caught before hitting Twilio ──
+                    failure_reason="Invalid mobile number — must be 10 digits",
+                )
 
                 failed.append({
 
@@ -393,7 +400,9 @@ def send_bulk_sms(request):
 
                     f'"message":"{item["message"]}", '
 
-                    f'"status":"failed"'
+                    f'"status":"failed", '
+
+                    f'"reason":"Invalid mobile number"'
 
                     f'}}'
                 )
@@ -403,26 +412,28 @@ def send_bulk_sms(request):
             # SUCCESS LOG
             sms_log = SMSLog.objects.create(
 
-    p_id=customer.p_id,
+                p_id=customer.p_id,
 
-    cust_name=customer.cust_name,
+                cust_name=customer.cust_name,
 
-    mobile_number=mobile_number,
+                mobile_number=mobile_number,
 
-    extra_fields=dict(
-        customer.extra_fields
-    ),
+                extra_fields=dict(
+                    customer.extra_fields
+                ),
 
-    sent_by=request.user
-    if request.user.is_authenticated
-    else None,
+                sent_by=request.user
+                if request.user.is_authenticated
+                else None,
 
-    message=item["message"],
+                message=item["message"],
 
-    status=target_status,
+                status=target_status,
 
-    scheduled_time=scheduled_datetime
-)
+                scheduled_time=scheduled_datetime,
+
+                failure_reason=None,
+            )
 
             print(
 

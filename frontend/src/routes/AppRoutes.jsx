@@ -26,6 +26,8 @@ import Users from "../pages/admin/UsersPage"
 
 import BulkSMS from "../pages/operator/BulkSMS";
 
+import OperatorLogsPage from "../pages/operator/OperatorLogsPage";
+
 export default function AppRoutes() {
 
   return (
@@ -116,6 +118,10 @@ export default function AppRoutes() {
             element={<BulkSMS />}
           />
           <Route path="queries" element={<QueryPage isAdmin={false} />} />
+          <Route
+            path="operatorlogs"
+            element={<OperatorLogsPage />}
+          />
 
         </Route>
 

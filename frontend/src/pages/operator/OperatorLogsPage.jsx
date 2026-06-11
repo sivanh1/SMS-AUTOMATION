@@ -3,12 +3,13 @@ import toast from "react-hot-toast";
 import * as XLSX from "xlsx";
 import api from "../../services/api";
 
-export default function LogsPage() {
+export default function OperatorLogsPage() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("All");
 
+  const currentUsername = localStorage.getItem("username");
   const logsPerPage = 5;
 
   const fetchLogs = async () => {
@@ -16,7 +17,7 @@ export default function LogsPage() {
       const response = await api.get("/sms/logs/");
       setLogs(response.data);
     } catch (error) {
-      toast.error("Failed");
+      toast.error("Failed to fetch logs");
     } finally {
       setLoading(false);
     }
@@ -27,20 +28,23 @@ export default function LogsPage() {
   }, []);
 
   const getDisplayStatus = (log) => {
-    if (log.status === "failed") return "Failed";
+    if (log.status?.toLowerCase() === "failed") return "Failed";
     if (log.status === "pending" || log.scheduled_time) {
       const now = new Date();
       const scheduled = new Date(log.scheduled_time);
-      if (scheduled > now) {
-        return "Scheduled";
-      } else {
-        return "Logged";
-      }
+      if (scheduled > now) return "Scheduled";
+      return "Logged";
     }
-    return log.status ? log.status.charAt(0).toUpperCase() + log.status.slice(1) : "Logged";
+    return log.status
+      ? log.status.charAt(0).toUpperCase() + log.status.slice(1)
+      : "Logged";
   };
 
-  const filteredLogs = logs.filter((log) => {
+  const myLogs = logs.filter(
+    (log) => log.sent_by?.username === currentUsername
+  );
+
+  const filteredLogs = myLogs.filter((log) => {
     if (statusFilter === "All") return true;
     return getDisplayStatus(log).toLowerCase() === statusFilter.toLowerCase();
   });
@@ -50,8 +54,6 @@ export default function LogsPage() {
   const currentLogs = filteredLogs.slice(indexOfFirstLog, indexOfLastLog);
   const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
 
-  // ── Export handler ──────────────────────────────────────────────────────────
-  // ── Export handler ──────────────────────────────────────────────────────────
   const exportToExcel = () => {
     if (filteredLogs.length === 0) {
       toast.error("No logs to export");
@@ -63,17 +65,14 @@ export default function LogsPage() {
       Customer: log.cust_name,
       Mobile: log.mobile_number,
       Message: log.message,
-      "Sent By": log.sent_by?.username,
       Status: getDisplayStatus(log),
       Date: new Date(log.created_at).toLocaleDateString(),
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
 
-    // Calculate dynamic column widths
     const headers = Object.keys(exportData[0]);
     const wscols = headers.map((header) => {
-      // Find the maximum length between the header text and all row values for this column
       const maxLength = Math.max(
         header.length,
         ...exportData.map((row) => {
@@ -81,22 +80,15 @@ export default function LogsPage() {
           return cellValue ? cellValue.toString().length : 0;
         })
       );
-
-      // Return the width (wch = width in characters). 
-      // Adding 2 for a little extra padding so it doesn't look cramped.
-      // Capping the max width at 100 so extremely long messages don't make the column unscrollable.
       return { wch: Math.min(maxLength + 2, 100) };
     });
 
-    // Apply the column widths to the worksheet
     worksheet["!cols"] = wscols;
 
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "SMS Logs");
-    XLSX.writeFile(workbook, "SMS_Logs_Export.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "My SMS Logs");
+    XLSX.writeFile(workbook, `SMS_Logs_${currentUsername}.xlsx`);
   };
-  // ───────────────────────────────────────────────────────────────────────────
-  // ───────────────────────────────────────────────────────────────────────────
 
   const MessageCell = ({ message }) => {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -159,20 +151,20 @@ export default function LogsPage() {
 
       {/* Header */}
       <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-
         <div>
           <h1 className="text-3xl font-semibold text-gray-800 dark:text-[#e5e5e5]">
-            SMS Logs
+            My SMS Logs
           </h1>
           <p className="text-sm mt-1 text-gray-500 dark:text-[#9ca3af]">
-            View all sent SMS history
+            Showing logs sent by{" "}
+            <span className="font-medium text-gray-700 dark:text-[#e5e5e5]">
+              {currentUsername}
+            </span>
           </p>
         </div>
 
         {/* Right side: filter + export */}
         <div className="flex items-center gap-3">
-
-          {/* Filter Dropdown */}
           <select
             value={statusFilter}
             onChange={(e) => {
@@ -194,19 +186,16 @@ export default function LogsPage() {
             <option value="Scheduled">Scheduled</option>
           </select>
 
-          {/* Export Button */}
           <button
             onClick={exportToExcel}
             className="
               px-4 py-2 rounded-lg text-sm font-medium
               bg-blue-600 hover:bg-blue-700
-              text-white
-              transition-colors
+              text-white transition-colors
             "
           >
             Export to Excel
           </button>
-
         </div>
       </div>
 
@@ -220,7 +209,6 @@ export default function LogsPage() {
                 <th className="text-left px-6 py-4 font-medium">Customer</th>
                 <th className="text-left px-6 py-4 font-medium">Mobile</th>
                 <th className="text-left px-6 py-4 font-medium">Message</th>
-                <th className="text-left px-6 py-4 font-medium">Sent By</th>
                 <th className="text-left px-6 py-4 font-medium">Status</th>
                 <th className="text-left px-6 py-4 font-medium">Date</th>
               </tr>
@@ -229,13 +217,13 @@ export default function LogsPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-10 text-gray-400 dark:text-[#9ca3af]">
+                  <td colSpan="6" className="text-center py-10 text-gray-400 dark:text-[#9ca3af]">
                     Loading logs...
                   </td>
                 </tr>
               ) : filteredLogs.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-10 text-gray-400 dark:text-[#9ca3af]">
+                  <td colSpan="6" className="text-center py-10 text-gray-400 dark:text-[#9ca3af]">
                     No logs found
                   </td>
                 </tr>
@@ -256,9 +244,6 @@ export default function LogsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <MessageCell message={log.message} />
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-[#9ca3af]">
-                      {log.sent_by?.username}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col items-start gap-1">

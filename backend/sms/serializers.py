@@ -31,8 +31,11 @@ class SMSLogSerializer(
 
             'status',
 
+            # ── Shows why the message failed if it did ──
+            'failure_reason',
+
             'created_at',
-            
+
             'scheduled_time'
         ]
 
