@@ -534,6 +534,7 @@ export default function TemplatesPage() {
 
 
           {/* MESSAGE */}
+          {/* MESSAGE */}
           <div>
 
             <textarea
@@ -543,11 +544,10 @@ export default function TemplatesPage() {
 
               value={message}
 
-              onChange={(e) =>
-                setMessage(
-                  e.target.value
-                )
-              }
+              onChange={(e) => {
+                if (e.target.value.length <= 160)
+                  setMessage(e.target.value);
+              }}
 
               className="
                 w-full
@@ -579,6 +579,20 @@ export default function TemplatesPage() {
               "
             />
 
+            <p
+              className={`
+              mt-1
+              text-xs
+              text-right
+              ${message.length >= 160
+                  ? "text-red-500 dark:text-red-400"
+                  : "text-gray-400 dark:text-[#666]"
+                }
+  `}
+            >
+              {message.length}/160
+            </p>
+
             {messageError && (
 
               <p
@@ -596,7 +610,6 @@ export default function TemplatesPage() {
             )}
 
           </div>
-
 
 
           {/* ACTIONS */}
