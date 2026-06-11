@@ -218,6 +218,13 @@ Delivery result (Logged / Failed) written back to MySQL
       <sub>Admin ticket resolution center</sub>
     </td>
   </tr>
+  <tr>
+    <td align="center">
+      <img src="assets/OperatorLogs.png" alt="Operator Logs" /><br/>
+      <b>Operator Logs</b><br/>
+      <sub>Personalized SMS logs</sub>
+    </td>
+  </tr>
 </table>
 
 &nbsp;
@@ -583,10 +590,10 @@ SMS-AUTOMATION/
 │   └── requirements.txt             # Python dependencies
 │
 └── frontend/
-    ├── node_modules/                # Node.js dependencies
-    ├── public/                      # Static public assets
+    ├── node_modules/
+    ├── public/
     ├── src/
-    │   ├── assets/                  # Images and static resources
+    │   ├── assets/
     │   ├── components/
     │   │   ├── Sidebar.jsx          # App-wide sidebar navigation
     │   │   └── XLSXUpload.jsx       # Excel file upload component
@@ -596,26 +603,27 @@ SMS-AUTOMATION/
     │   │   └── MainLayout.jsx       # Shared page layout wrapper
     │   ├── pages/
     │   │   ├── admin/
-    │   │   │   ├── CustomerPage.jsx    # Customer management view
-    │   │   │   ├── DashboardPage.jsx   # Admin KPI dashboard
-    │   │   │   ├── LogsPage.jsx        # SMS audit logs
-    │   │   │   ├── TemplatesPage.jsx   # Template CRUD
-    │   │   │   └── UsersPage.jsx       # User management
+    │   │   │   ├── CustomerPage.jsx      # Customer management view
+    │   │   │   ├── DashboardPage.jsx     # Admin KPI dashboard
+    │   │   │   ├── LogsPage.jsx          # System-wide SMS audit logs
+    │   │   │   ├── TemplatesPage.jsx     # Template CRUD
+    │   │   │   └── UsersPage.jsx         # User management
     │   │   ├── auth/
-    │   │   │   └── LoginPage.jsx       # JWT login portal
+    │   │   │   └── LoginPage.jsx         # JWT login portal
     │   │   ├── operator/
-    │   │   │   ├── BulkSMS.jsx         # Bulk SMS dispatch with previews
-    │   │   │   └── SmsSenderPage.jsx   # Single SMS sender
-    │   │   └── QueryPage.jsx           # Support query page (operator)
+    │   │   │   ├── BulkSMS.jsx           # Bulk SMS dispatch with previews
+    │   │   │   ├── SmsSenderPage.jsx     # Single SMS sender
+    │   │   │   └── OperatorLogsPage.jsx  # Personalized SMS history for the logged-in operator
+    │   │   └── QueryPage.jsx             # Support query page (operator)
     │   ├── routes/
-    │   │   ├── AppRoutes.jsx        # Top-level route definitions
-    │   │   └── ProtectedRoute.jsx   # Role-based route guard
+    │   │   ├── AppRoutes.jsx
+    │   │   └── ProtectedRoute.jsx
     │   ├── services/
-    │   │   └── api.js               # Axios API service layer
-    │   ├── App.css                  # Global app styles
-    │   ├── App.jsx                  # Root application component
-    │   ├── index.css                # Base CSS / Tailwind directives
-    │   └── main.jsx                 # Vite entry point
+    │   │   └── api.js
+    │   ├── App.css
+    │   ├── App.jsx
+    │   ├── index.css
+    │   └── main.jsx
     ├── .gitignore
     ├── eslint.config.js
     ├── index.html
