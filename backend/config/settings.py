@@ -94,12 +94,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 
 # DATABASE CONFIGURATION
+# DATABASE CONFIGURATION
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'sms_automation',
         'USER': 'root',
-        'PASSWORD': 'sivanesh',
+        'PASSWORD': os.getenv('DB_PASSWORD'),  
         'HOST': 'localhost',
         'PORT': '3306',
     }
