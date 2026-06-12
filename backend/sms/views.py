@@ -179,23 +179,38 @@ def send_sms(request):
 
 # SMS LOGS
 
-@api_view(['GET'])
-@permission_classes([AllowAny])
+# SMS LOGS
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])  # changed from AllowAny
 def sms_logs(request):
 
-    logs = SMSLog.objects.all().order_by(
-        '-created_at'
-    )
+    page = int(request.query_params.get('page', 1))
+    page_size = int(request.query_params.get('page_size', 5))
+    status_filter = request.query_params.get('status', 'all').lower()
 
-    serializer = SMSLogSerializer(
-        logs,
-        many=True
-    )
+    logs = SMSLog.objects.all().order_by('-created_at')
 
-    return Response(serializer.data)
+    if status_filter == 'failed':
+        logs = logs.filter(status='failed')
+    elif status_filter == 'logged':
+        logs = logs.filter(status='logged')
+    elif status_filter == 'pending':
+        logs = logs.filter(status='pending')
 
+    total = logs.count()
+    start = (page - 1) * page_size
+    end = start + page_size
 
+    serializer = SMSLogSerializer(logs[start:end], many=True)
+
+    return Response({
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": (total + page_size - 1) // page_size,
+        "results": serializer.data
+    })
 # BULK SMS PREVIEW
 
 @api_view(['POST'])

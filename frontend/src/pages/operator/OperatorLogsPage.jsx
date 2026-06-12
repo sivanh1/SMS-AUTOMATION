@@ -7,15 +7,20 @@ export default function OperatorLogsPage() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState("All");
+  const [totalPages, setTotalPages] = useState(1);
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const currentUsername = localStorage.getItem("username");
   const logsPerPage = 5;
 
-  const fetchLogs = async () => {
+  const fetchLogs = async (page = 1, filter = "all") => {
+    setLoading(true);
     try {
-      const response = await api.get("/sms/logs/");
-      setLogs(response.data);
+      const response = await api.get("/sms/logs/", {
+        params: { page, page_size: logsPerPage, status: filter, sent_by: currentUsername },
+      });
+      setLogs(response.data.results);
+      setTotalPages(response.data.total_pages);
     } catch (error) {
       toast.error("Failed to fetch logs");
     } finally {
@@ -24,8 +29,8 @@ export default function OperatorLogsPage() {
   };
 
   useEffect(() => {
-    fetchLogs();
-  }, []);
+    fetchLogs(currentPage, statusFilter);
+  }, [currentPage, statusFilter]);
 
   const getDisplayStatus = (log) => {
     if (log.status?.toLowerCase() === "failed") return "Failed";
@@ -40,27 +45,13 @@ export default function OperatorLogsPage() {
       : "Logged";
   };
 
-  const myLogs = logs.filter(
-    (log) => log.sent_by?.username === currentUsername
-  );
-
-  const filteredLogs = myLogs.filter((log) => {
-    if (statusFilter === "All") return true;
-    return getDisplayStatus(log).toLowerCase() === statusFilter.toLowerCase();
-  });
-
-  const indexOfLastLog = currentPage * logsPerPage;
-  const indexOfFirstLog = indexOfLastLog - logsPerPage;
-  const currentLogs = filteredLogs.slice(indexOfFirstLog, indexOfLastLog);
-  const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
-
   const exportToExcel = () => {
-    if (filteredLogs.length === 0) {
+    if (logs.length === 0) {
       toast.error("No logs to export");
       return;
     }
 
-    const exportData = filteredLogs.map((log) => ({
+    const exportData = logs.map((log) => ({
       P_ID: log.p_id,
       Customer: log.cust_name,
       Mobile: log.mobile_number,
@@ -109,7 +100,6 @@ export default function OperatorLogsPage() {
     );
   };
 
-  // ── Tooltip bubble that appears on hover ──
   const FailedBadge = ({ reason }) => {
     const [show, setShow] = useState(false);
 
@@ -119,12 +109,9 @@ export default function OperatorLogsPage() {
         onMouseEnter={() => setShow(true)}
         onMouseLeave={() => setShow(false)}
       >
-        {/* The red Failed badge */}
         <span className="text-xs px-3 py-1 rounded-full w-fit cursor-default bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400">
           Failed
         </span>
-
-        {/* Bubble tooltip — only shows on hover if reason exists */}
         {show && reason && (
           <div className="
             absolute z-50 bottom-full left-0 mb-2
@@ -133,7 +120,6 @@ export default function OperatorLogsPage() {
             text-white text-[11px] leading-snug
             border border-gray-700 dark:border-[#2a2a2a]
           ">
-            {/* Little arrow pointing down */}
             <div className="
               absolute top-full left-4
               border-4 border-transparent
@@ -163,7 +149,6 @@ export default function OperatorLogsPage() {
           </p>
         </div>
 
-        {/* Right side: filter + export */}
         <div className="flex items-center gap-3">
           <select
             value={statusFilter}
@@ -180,10 +165,10 @@ export default function OperatorLogsPage() {
               transition-colors
             "
           >
-            <option value="All">All Statuses</option>
-            <option value="Logged">Logged</option>
-            <option value="Failed">Failed</option>
-            <option value="Scheduled">Scheduled</option>
+            <option value="all">All Statuses</option>
+            <option value="logged">Logged</option>
+            <option value="failed">Failed</option>
+            <option value="pending">Scheduled</option>
           </select>
 
           <button
@@ -221,14 +206,14 @@ export default function OperatorLogsPage() {
                     Loading logs...
                   </td>
                 </tr>
-              ) : filteredLogs.length === 0 ? (
+              ) : logs.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="text-center py-10 text-gray-400 dark:text-[#9ca3af]">
                     No logs found
                   </td>
                 </tr>
               ) : (
-                currentLogs.map((log) => (
+                logs.map((log) => (
                   <tr
                     key={log.id}
                     className="border-b last:border-none border-gray-200 dark:border-[#2a2a2a] hover:bg-gray-50 dark:hover:bg-[#1c1c1c] transition-colors"
@@ -247,8 +232,6 @@ export default function OperatorLogsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col items-start gap-1">
-
-                        {/* Failed gets the hover bubble, others get normal badge */}
                         {getDisplayStatus(log) === "Failed" ? (
                           <FailedBadge reason={log.failure_reason} />
                         ) : (
@@ -262,7 +245,6 @@ export default function OperatorLogsPage() {
                             {getDisplayStatus(log)}
                           </span>
                         )}
-
                         {getDisplayStatus(log) === "Scheduled" && log.scheduled_time && (
                           <span className="text-[11px] text-gray-500 dark:text-[#9ca3af] mt-1 whitespace-nowrap">
                             {new Date(log.scheduled_time).toLocaleString([], {
@@ -273,7 +255,6 @@ export default function OperatorLogsPage() {
                             })}
                           </span>
                         )}
-
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-[#9ca3af]">
