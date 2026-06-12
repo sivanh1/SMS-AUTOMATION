@@ -66,10 +66,10 @@ export default function DashboardPage() {
         api.get("/customers/listcustomers/"),
         api.get("/users/all/"),
         api.get("/templates/"),
-        api.get("/sms/logs/"),
+        api.get("/sms/logs/", { params: { page: 1, page_size: 5 } }), // ✅ fetch only last 5
       ]);
 
-      const logs = logsRes.data;
+      const logs = logsRes.data.results; // ✅ read from .results
       const loggedCount = logs.filter((log) => log.status === "logged").length;
       const failedCount = logs.filter((log) => log.status === "failed").length;
 
@@ -77,13 +77,12 @@ export default function DashboardPage() {
         customers: customersRes.data.length,
         users: usersRes.data.length,
         templates: templatesRes.data.length,
-        logs: logs.length,
+        logs: logsRes.data.count, // ✅ use total count from API
         loggedCount,
         failedCount,
       });
 
-      // Isolates the last 5 logs cleanly for your dashboard display preview
-      setRecentLogs(logs.slice(0, 5));
+      setRecentLogs(logs); // ✅ already 5 items, no slice needed
     } catch (error) {
       console.log(error);
     } finally {
@@ -174,7 +173,7 @@ export default function DashboardPage() {
         {/* SMS LOGS BREAKDOWN */}
         <div className="bg-white dark:bg-[#181818] border border-gray-100 dark:border-[#2a2a2a] shadow-sm rounded-2xl p-6 transition-all hover:shadow-md">
           <div className="flex justify-between items-center mb-4">
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total SMS Logs</p>
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Recent SMS Logs</p>
             <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg">
               <Icons.Message />
             </div>
