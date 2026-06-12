@@ -491,6 +491,7 @@ Create a `.env` file in the `/backend` directory. Use the reference below:
 | `TWILIO_ACCOUNT_SID` | Twilio account SID — found in your Twilio console |
 | `TWILIO_AUTH_TOKEN` | Twilio auth token — found in your Twilio console |
 | `TWILIO_PHONE_NUMBER` | Verified Twilio sender number (e.g. `+1234567890`) |
+| `DB_PASSWORD` | MySQL password for the DB (e.g. `my_password`) |
 
 **Example `.env`:**
 
@@ -498,6 +499,7 @@ Create a `.env` file in the `/backend` directory. Use the reference below:
 TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_AUTH_TOKEN=your_auth_token
 TWILIO_PHONE_NUMBER=+1234567890
+DB_PASSWORD=my_password
 ```
 
 &nbsp;
